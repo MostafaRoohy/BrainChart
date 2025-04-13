@@ -14,6 +14,13 @@ TradingView's charts are the gold standard in financial visualization, but using
 
 ## 🤝 Contributing
 
-We welcome you! ping us:
+I welcome your ideas!  
+ping me!  
 
+[![EMail](https://img.shields.io/badge/EMail-white)](mailto:MostafaRoohy@protonmail.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-blue)](https://linkedin.com/in/mostafaroohy)
+[![Telegram](https://img.shields.io/badge/Telegram-skyblue)](https://telegram.me/MostafaRoohy)
+[![Telegram Channel](https://img.shields.io/badge/BrainyAlgo-lightblue)](https://telegram.me/BrainyAlgo)  
+
+##
 Star ⭐ the repo if this saves you hours of work!
