@@ -11,14 +11,25 @@ from typing import List, Dict, Optional
 from IPython.display import IFrame
 from IPython.display import clear_output
 from .valid_shapes import OnePointShapes, MultiPointShapes
-
+import pandas as pd
 
 # ===============================  Chart Functions ===============================
 # ================================================================================
 class BrainyChart:
 
-    def __init__(self, port=8000, verbose:bool=False, jupyter:bool=True):
+    def __init__(self, data:pd.DataFrame=None, port=8000, verbose:bool=False, jupyter:bool=True):
 
+        package_dir = Path(__file__).parent
+
+        with open(f"{package_dir}/tradingview.db", 'w') as file:
+
+            file.write(f"")
+        #
+
+        if (data is not None  and  list(data.columns)==['timestamp', 'open', 'high', 'low', 'close', 'volume']):
+
+            data.to_csv(f"{package_dir}/datafeed.csv", index=False)
+        #
         self._port    = port
         self._url     = f"http://localhost:{port}/index.html"
         self._verbose = verbose
@@ -42,7 +53,7 @@ class BrainyChart:
 
         print(f"Starting backend server on port {self._port}...")
 
-        backend_dir = Path(__file__).parent / "charting_library"
+        package_dir = Path(__file__).parent / "charting_library"
         cmd = [
             "uvicorn", 
             "backend.main:app",
@@ -55,7 +66,7 @@ class BrainyChart:
 
             server_process = subprocess.Popen(
                 cmd,
-                cwd=str(backend_dir),
+                cwd=str(package_dir),
                 shell=shell
             )
                         
@@ -66,7 +77,7 @@ class BrainyChart:
             with open(os.devnull, 'w') as fnull:
                 server_process = subprocess.Popen(
                     cmd,
-                    cwd=str(backend_dir),
+                    cwd=str(package_dir),
                     shell=shell,
                     stdout=fnull,
                     stderr=fnull
@@ -83,10 +94,10 @@ class BrainyChart:
 
             print(f"Starting frontend server on port {self._port}...")
 
-            backend_dir = Path(__file__).parent / "charting_library"
+            package_dir = Path(__file__).parent / "charting_library"
             subprocess.Popen(
                 ["python3", "-m", "http.server", f"{self._port}"],
-                cwd=str(backend_dir),
+                cwd=str(package_dir),
             )
         #
         except Exception as e:
