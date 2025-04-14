@@ -9,25 +9,109 @@ import logging
 from pathlib import Path
 from typing import List, Dict, Optional
 from IPython.display import IFrame
-
+from IPython.display import clear_output
 from .valid_shapes import OnePointShapes, MultiPointShapes
-
 
 
 # ===============================  Chart Functions ===============================
 # ================================================================================
 class BrainyChart:
 
-    def __init__(self, url="http://localhost:8000/index.html", width="600", height="300"):
+    def __init__(self, port=8000, verbose:bool=False, jupyter:bool=True):
 
-        self.width  = width
-        self.height = height
-        self.url    = url
+        self._port    = port
+        self._url     = f"http://localhost:{port}/index.html"
+        self._verbose = verbose
+        self._jupyter = jupyter
     #
-        
-    def imagine(self):
 
-        return IFrame(src=self.url, width=self.width, height=self.height)
+    def _kill_servers(self):
+
+        try:
+
+            subprocess.run(["pkill", "-f", "uvicorn"]    , check=True)
+            subprocess.run(["pkill", "-f", "http.server"], check=True)
+        #
+        except subprocess.CalledProcessError:
+
+            pass
+        #
+    #
+
+    def _run_backend(self):
+
+        print(f"Starting backend server on port {self._port}...")
+
+        backend_dir = Path(__file__).parent / "charting_library"
+        cmd = [
+            "uvicorn", 
+            "backend.main:app",
+            "--host", "0.0.0.0",
+            "--port", "8001"
+        ]
+        shell = False
+        
+        if (self._verbose==True):
+
+            server_process = subprocess.Popen(
+                cmd,
+                cwd=str(backend_dir),
+                shell=shell
+            )
+                        
+            return (server_process)
+        #
+        else:
+
+            with open(os.devnull, 'w') as fnull:
+                server_process = subprocess.Popen(
+                    cmd,
+                    cwd=str(backend_dir),
+                    shell=shell,
+                    stdout=fnull,
+                    stderr=fnull
+                )
+            #
+            
+            return (server_process)
+        #
+    #
+
+    def _run_frontend(self):
+
+        try:
+
+            print(f"Starting frontend server on port {self._port}...")
+
+            backend_dir = Path(__file__).parent / "charting_library"
+            subprocess.Popen(
+                ["python3", "-m", "http.server", f"{self._port}"],
+                cwd=str(backend_dir),
+            )
+        #
+        except Exception as e:
+
+            print(f"Error running frontend server: {e}")
+        #
+    #
+
+    def imagine(self, width=1500, height=600):
+
+        self._kill_servers()
+        self._run_backend()
+        self._run_frontend()
+        print("Please wait...")
+        time.sleep(4)
+        clear_output()
+
+        if (self._jupyter):
+
+            return (IFrame(src=self._url, width=width, height=height))
+        #
+        else:
+
+            return (None)
+        #
     #
 #
 # ================================================================================
@@ -40,18 +124,13 @@ class BrainyChart:
 # ================================================================================
 class ShapeManager:
 
-    def __init__(self, base_url: str = "http://localhost:8001", default_chart_id: int = 1):
+    def __init__(self, base_url:str="http://localhost:8001", default_chart_id:int=1):
 
         self.base_url = base_url
         self.default_chart_id = default_chart_id
         # self._check_servers_alive()
     #
-    # ======================
-    # def _check_servers_alive(self):
-    #     response = requests.get(self.base_url)
-    #     response.raise_for_status()
 
-    # ======================
     def _generate_random_code(
         self, 
         length:int=6
@@ -60,7 +139,6 @@ class ShapeManager:
         return (random.randint(10**(length-1), (10**length)-1))
     #
 
-    # ======================
     def create_or_update_shape(
         self,
         shape_type: OnePointShapes | MultiPointShapes,
@@ -107,7 +185,6 @@ class ShapeManager:
         }
     #
 
-    # ======================
     def get_all_shapes(
         self
     ) -> List[Dict]:
@@ -119,7 +196,6 @@ class ShapeManager:
         return response.json()
     #
 
-    # ======================
     def get_shape(
         self,
         shape_code:int,
@@ -138,7 +214,6 @@ class ShapeManager:
             raise
     #
 
-    # ======================
     def delete_shape(
         self, 
         shape_code:int, 
@@ -152,7 +227,6 @@ class ShapeManager:
         return (response.json())
     #
 
-    # ======================
     def delete_all_shapes(
         self
     ) -> Dict:
