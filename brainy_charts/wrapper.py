@@ -21,7 +21,7 @@ class BrainyChart:
 
         package_dir = Path(__file__).parent
 
-        with open(f"{package_dir}/tradingview.db", 'w') as file:
+        with open(f"{package_dir}/charting_library/tradingview.db", 'w') as file:
 
             file.write(f"")
         #
@@ -113,7 +113,9 @@ class BrainyChart:
         self._run_frontend()
         print("Please wait...")
         time.sleep(4)
-        clear_output()
+        if (not self._verbose):
+            clear_output()
+        #
 
         if (self._jupyter):
 

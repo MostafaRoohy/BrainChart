@@ -19,9 +19,11 @@ router = APIRouter()
 
 @router.get("/")
 async def root():
+
     return {"message": "Welcome to TradingView Charting Library Backend"}
-
-
+#
+#################################################################################################
+#
 @router.get("/history")
 async def get_history(
     symbol: str,
@@ -78,7 +80,7 @@ async def get_history(
             return JSONResponse(content={"s": "no_data", "nextTime": from_time})
     except Exception as e:
         return JSONResponse(content={"s": "error", "errmsg": str(e)})
-
+#
 
 @router.get("/symbols")
 async def get_symbols():
@@ -103,7 +105,7 @@ async def get_symbols():
         "logo_urls": ["https://s3-symbol-logo.tradingview.com/crypto/XTVCBTC.svg"],
         "exchange_logo": "https://s3-symbol-logo.tradingview.com/crypto/XTVCBTC.svg"
     }
-
+#
 
 @router.get("/symbol_info")
 async def get_symbol_info(symbol: str):
@@ -128,7 +130,7 @@ async def get_symbol_info(symbol: str):
         "visible_plots_set": "ohlcv",
         "supported_resolutions": ["1", "5", "15", "30", "60", "D", "W"]
     }
-
+#
 
 @router.get("/config")
 async def get_config():
@@ -154,12 +156,13 @@ async def get_config():
             {"name":"Crypto","value":"crypto"}
             ],
     }
-
+#
 
 @router.get("/time")
 async def get_server_time():
-    return int(last_timestamp)
 
+    return int(last_timestamp)
+#
 
 @router.get("/search")
 async def search_symbols(
@@ -180,8 +183,9 @@ async def search_symbols(
             }
         ]
     }
-
-
+#
+#################################################################################################
+#
 @router.post("/charts/{chart_id}/shapes/", response_model=ShapeResponse)
 async def create_shape(
     chart_id: int, 
@@ -226,7 +230,7 @@ async def create_shape(
         db.refresh(db_shape)
         db.close()
         return db_shape
-
+#
 
 @router.get("/charts/{chart_id}/shapes/", response_model=list[ShapeResponse])
 async def get_chart_shapes(
@@ -246,7 +250,7 @@ async def get_chart_shapes(
 
     db.close()
     return shapes
-
+#
 
 @router.get("/charts/{chart_id}/shapes/{shape_code}", response_model=ShapeResponse)
 async def get_shape(
@@ -269,7 +273,7 @@ async def get_shape(
     
     print(f'== Get single shape: {shape.shape_id}, {shape.shape_code}')
     return shape
-
+#
 
 @router.delete("/charts/{chart_id}/shapes/{shape_code}")
 async def delete_shape(
@@ -291,7 +295,7 @@ async def delete_shape(
     db.commit()
     db.close()
     return {"status": "deleted"}
-
+#
 
 @router.delete("/charts/{chart_id}/shapes/")
 async def delete_all_shapes_in_chart(
@@ -322,3 +326,6 @@ async def delete_all_shapes_in_chart(
         
     finally:
         db.close()
+#
+#################################################################################################
+#
