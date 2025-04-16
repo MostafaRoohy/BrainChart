@@ -51,40 +51,47 @@ class BrainyChart:
 
     def _run_backend(self):
 
-        print(f"Starting backend server on port {self._port}...")
+        try:
 
-        package_dir = Path(__file__).parent / "charting_library"
-        cmd = [
-            "uvicorn", 
-            "backend.main:app",
-            "--host", "0.0.0.0",
-            "--port", "8001"
-        ]
-        shell = False
-        
-        if (self._verbose==True):
+            print(f"Starting backend server on port {self._port}...")
 
-            server_process = subprocess.Popen(
-                cmd,
-                cwd=str(package_dir),
-                shell=shell
-            )
-                        
-            return (server_process)
-        #
-        else:
+            package_dir = Path(__file__).parent / "charting_library"
+            cmd = [
+                "uvicorn", 
+                "backend.main:app",
+                "--host", "0.0.0.0",
+                "--port", "8001"
+            ]
+            shell = False
+            
+            if (self._verbose==True):
 
-            with open(os.devnull, 'w') as fnull:
                 server_process = subprocess.Popen(
                     cmd,
                     cwd=str(package_dir),
-                    shell=shell,
-                    stdout=fnull,
-                    stderr=fnull
+                    shell=shell
                 )
+                            
+                return (server_process)
             #
-            
-            return (server_process)
+            else:
+
+                with open(os.devnull, 'w') as fnull:
+                    server_process = subprocess.Popen(
+                        cmd,
+                        cwd=str(package_dir),
+                        shell=shell,
+                        stdout=fnull,
+                        stderr=fnull
+                    )
+                #
+                
+                return (server_process)
+            #
+        #
+        except Exception as e:
+
+            print(f"Error running frontend server: {e}")
         #
     #
 
@@ -95,10 +102,34 @@ class BrainyChart:
             print(f"Starting frontend server on port {self._port}...")
 
             package_dir = Path(__file__).parent / "charting_library"
-            subprocess.Popen(
-                ["python3", "-m", "http.server", f"{self._port}"],
-                cwd=str(package_dir),
-            )
+            cmd = [
+                "python3", 
+                "-m",
+                "http.server",
+                f"{self._port}",
+            ]
+            shell = False
+
+            if (self._verbose==True):
+
+                subprocess.Popen(
+                    cmd,
+                    cwd=str(package_dir),
+                    shell=shell,
+                )
+            #
+            else:
+
+                with open(os.devnull, 'w') as fnull:
+                    subprocess.Popen(
+                        cmd,
+                        cwd=str(package_dir),
+                        shell=shell,
+                        stdout=fnull,
+                        stderr=fnull
+                    )
+                #
+            #
         #
         except Exception as e:
 
@@ -106,14 +137,14 @@ class BrainyChart:
         #
     #
 
-    def imagine(self, width=1500, height=600):
+    def imagine(self, width=1200, height=600):
 
         self._kill_servers()
         self._run_backend()
         self._run_frontend()
         print("Please wait...")
         time.sleep(4)
-        if (not self._verbose):
+        if (not self._verbose or self._jupyter):
             clear_output()
         #
 
