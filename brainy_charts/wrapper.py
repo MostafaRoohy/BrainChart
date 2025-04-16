@@ -23,7 +23,7 @@ class BrainyChart:
 
         with open(f"{package_dir}/charting_library/tradingview.db", 'w') as file:
 
-            file.write(f"")
+            pass
         #
 
         if (data is not None  and  list(data.columns)==['timestamp', 'open', 'high', 'low', 'close', 'volume']):
