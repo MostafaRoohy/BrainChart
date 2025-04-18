@@ -170,9 +170,8 @@ class ShapeManager:
 
     def __init__(self, base_url:str="http://localhost:8001", default_chart_id:int=1):
 
-        self.base_url = base_url
+        self.base_url         = base_url
         self.default_chart_id = default_chart_id
-        # self._check_servers_alive()
     #
 
     def _generate_random_code(
@@ -185,16 +184,16 @@ class ShapeManager:
 
     def create_or_update_shape(
         self,
-        shape_type: OnePointShapes | MultiPointShapes,
-        points: List[Dict[str, float]],
-        properties: Dict,
-        shape_code: Optional[int] = None,
-        shape_id: Optional[str] = None
+        shape_type : OnePointShapes | MultiPointShapes,
+        points     : List[Dict[str, float]],
+        properties : Dict,
+        shape_code : Optional[int] = None,
+        shape_id   : Optional[str] = None
     ) -> Dict:
         
-        chart_id = self.default_chart_id
+        chart_id   = self.default_chart_id
         shape_code = shape_code or self._generate_random_code()
-        shape_id = shape_id
+        shape_id   = shape_id
         
         is_one_point = shape_type in [
             "emoji", "text", "icon", "anchored_text", "anchored_note", 
@@ -202,10 +201,14 @@ class ShapeManager:
             "vertical_line", "horizontal_line", "long_position", "short_position"
         ]
         
-        if is_one_point and len(points) != 1:
+        if (is_one_point and len(points) != 1):
+
             raise ValueError(f"Shape type {shape_type} requires 1 point")
-        elif not is_one_point and len(points) < 2:
+        #
+        elif (not is_one_point and len(points) < 2):
+
             raise ValueError(f"Shape type {shape_type} requires at least 2 points")
+        #
         
         payload = {
             "shape_id": shape_id,
@@ -217,7 +220,7 @@ class ShapeManager:
             }
         }
         
-        url = f"{self.base_url}/charts/{chart_id}/shapes/"
+        url      = f"{self.base_url}/charts/{chart_id}/shapes/"
         response = requests.post(url, json=payload)
         response.raise_for_status()
         
@@ -234,10 +237,10 @@ class ShapeManager:
     ) -> List[Dict]:
 
         chart_id = self.default_chart_id
-        url = f"{self.base_url}/charts/{chart_id}/shapes/"
+        url      = f"{self.base_url}/charts/{chart_id}/shapes/"
         response = requests.get(url)
         response.raise_for_status()
-        return response.json()
+        return (response.json())
     #
 
     def get_shape(
@@ -246,16 +249,22 @@ class ShapeManager:
     ) -> Dict:
 
         chart_id = self.default_chart_id
-        url = f"{self.base_url}/charts/{chart_id}/shapes/{shape_code}"
+        url      = f"{self.base_url}/charts/{chart_id}/shapes/{shape_code}"
         
         try:
+
             response = requests.get(url)
             response.raise_for_status()
-            return response.json()
+            return (response.json())
+        #
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 404:
+
+            if (e.response.status_code == 404):
+
                 raise ValueError(f"Shape with code {shape_code} not found") from e
+            #
             raise
+        #
     #
 
     def delete_shape(
