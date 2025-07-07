@@ -19,7 +19,7 @@ class BrainyChart:
 
     def __init__(self, data:pd.DataFrame=None, port=8000, verbose:bool=False, jupyter:bool=True):
 
-        package_dir = Path(__file__).parent
+        package_dir = Path(__file__).parent.parent
 
         with open(f"{package_dir}/charting_library/tradingview.db", 'w') as file:
 
@@ -55,7 +55,7 @@ class BrainyChart:
 
             print(f"Starting backend server on port {self._port}...")
 
-            package_dir = Path(__file__).parent / "charting_library"
+            package_dir = Path(__file__).parent
             cmd = [
                 "uvicorn", 
                 "backend.main:app",
@@ -101,7 +101,7 @@ class BrainyChart:
 
             print(f"Starting frontend server on port {self._port}...")
 
-            package_dir = Path(__file__).parent / "charting_library"
+            package_dir = Path(__file__).parent
             cmd = [
                 "python3", 
                 "-m",
