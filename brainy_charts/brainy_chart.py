@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import List, Dict, Optional
 from IPython.display import IFrame
 from IPython.display import clear_output
-from .valid_shapes import OnePointShapes, MultiPointShapes
 import pandas as pd
 #
 ###################################################################################################
@@ -20,7 +19,6 @@ import pandas as pd
 class BrainyChart:
 
     def __init__(self, data:pd.DataFrame=None, port=8000, verbose:bool=False, jupyter:bool=True):
-
 
         package_dir = Path(__file__).parent
 
@@ -148,9 +146,13 @@ class BrainyChart:
         self.run_frontend()
         print("Please wait...")
         time.sleep(4)
+
+
         if (not self._verbose or self._jupyter):
+
             clear_output()
         #
+
 
         if (self._jupyter):
 
