@@ -18,13 +18,12 @@ from typing import List, Dict, Optional, Literal
 ###################################################################################################
 ################################################################################################### Shape Manager
 #
-OnePointShapes = Literal[
+one_point_shapes   = [
     "emoji", "text", "icon", "anchored_text", "anchored_note", "note",
     "sticker", "arrow_up", "arrow_down", "flag", "vertical_line",
     "horizontal_line", "long_position", "short_position"
 ]
-
-MultiPointShapes = Literal[
+multi_point_shapes = [
     "triangle", "curve", "table", "circle", "ellipse", "path", "polyline",
     "extended", "signpost", "double_curve", "arc", "price_label", "price_note",
     "arrow_marker", "cross_line", "horizontal_ray", "trend_line", "info_line",
@@ -60,25 +59,15 @@ class BrainyShape:
         return (random.randint(10**(length-1), (10**length)-1))
     #
 
-    def create_or_update_shape(self,
-        shape_type : OnePointShapes | MultiPointShapes,
-        points     : List[Dict[str, float]],
-        properties : Dict,
-        shape_code : Optional[int] = None,
-        shape_id   : Optional[str] = None
-    ) -> Dict:
+    def create_or_update_shape(self, shape_type:str, points:List[Dict[str, float]], properties:Dict, shape_code:Optional[int]=None, shape_id:Optional[str]=None) -> Dict:
         
         chart_id   = self.default_chart_id
         shape_code = shape_code or self._generate_random_code()
         shape_id   = shape_id
         
-        is_one_point = shape_type in [
-            "emoji", "text", "icon", "anchored_text", "anchored_note", 
-            "note", "sticker", "arrow_up", "arrow_down", "flag", 
-            "vertical_line", "horizontal_line", "long_position", "short_position"
-        ]
+        is_one_point = shape_type in one_point_shapes
         
-        if (is_one_point and len(points) != 1):
+        if (is_one_point       and len(points) != 1):
 
             raise ValueError(f"Shape type {shape_type} requires 1 point")
         #
