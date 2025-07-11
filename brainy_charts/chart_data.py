@@ -10,6 +10,7 @@ class ChartData:
     The tohlcv_df must contain 'timestamp', 'open', 'high', 'low', 'close', 'volume' columns.
     The 'timestamp' column must be in milliseconds, and it must be in ascending order.
     '''
+    instances_count = 0
 
     def __init__(self,
                 tohlcv_df              = pd.DataFrame(),
@@ -36,9 +37,10 @@ class ChartData:
                 visible_plots_set      = "ohlcv",
                 supported_resolutions  = ["1", "5", "15", "30", "60", "240", "D", "W"]
     ):
-        
+        ChartData.instances_count  += 1
         
         self.tohlcv_df              = tohlcv_df
+        self.serving_file_name      = f"{name}_{ticker}_{exchange}_{ChartData.instances_count}"
         self.name                   = name
         self.ticker                 = ticker
         self.full_name              = full_name

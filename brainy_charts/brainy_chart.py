@@ -103,7 +103,7 @@ class BrainyChart:
 
             print(f"Starting frontend server on port {self._port}...")
 
-            package_dir = Path(__file__).parent
+            package_dir = Path(__file__).parent.parent
             cmd = [
                 "python3", 
                 "-m",
@@ -116,7 +116,7 @@ class BrainyChart:
 
                 subprocess.Popen(
                     cmd,
-                    cwd=str(package_dir),
+                    cwd=f"{package_dir}/charting_library",
                     shell=shell,
                 )
             #
@@ -125,7 +125,7 @@ class BrainyChart:
                 with open(os.devnull, 'w') as fnull:
                     subprocess.Popen(
                         cmd,
-                        cwd=str(package_dir),
+                        cwd=f"{package_dir}/charting_library",
                         shell=shell,
                         stdout=fnull,
                         stderr=fnull
