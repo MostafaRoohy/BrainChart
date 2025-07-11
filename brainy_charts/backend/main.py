@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from .routes import router
 from .models import Base
-from .database import engine
+from .database.database import engine
 
 
 app = FastAPI(title="TradingView Charting Library Backend")

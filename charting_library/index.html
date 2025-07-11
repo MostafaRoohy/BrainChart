@@ -20,7 +20,8 @@
 			}
 
 			function initOnReady() {
-				var datafeedUrl = "https://demo-feed-data.tradingview.com";
+				// var datafeedUrl = "https://demo-feed-data.tradingview.com";
+                var datafeedUrl = "http://localhost:8001";
 				var customDataUrl = getParameterByName('dataUrl');
 				if (customDataUrl !== "") {
 					datafeedUrl = customDataUrl.startsWith('https://') ? customDataUrl : `https://${customDataUrl}`;
@@ -47,7 +48,7 @@
 					charts_storage_api_version: "1.1",
 					client_id: 'tradingview.com',
 					user_id: 'public_user_id',
-					theme: getParameterByName('theme'),
+					theme: 'dark',
 				});
 				window.frames[0].focus();
 			};
