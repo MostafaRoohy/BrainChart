@@ -13,15 +13,14 @@ BrainyCharts
 │   └── backend/
 |       |
 |       ├── __init__.py
-|       ├── alembic.ini
-|       ├── data_loader.py
-|       ├── database.py
-|       ├── datafeed.py
 |       ├── main.py
 |       ├── models.py
 |       ├── routes.py
 |       ├── schemas.py
-|       ├── tradingview.db
+|       |
+|       ├── datafeed/
+|       |   |
+|       |   └──*
 |       |
 |       ├── migrations/
 |       |   |
