@@ -2,9 +2,12 @@ from sqlalchemy import Column, Integer, String, JSON, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
-
+#
+###################################################################################################
+###################################################################################################
+###################################################################################################
+#
 Base = declarative_base()
-
 
 class Chart(Base):
 
@@ -30,4 +33,8 @@ class Shape(Base):
     shape_data = Column(JSON)
     created_at = Column(DateTime, default=datetime.now)
     chart = relationship("Chart", back_populates="shapes")
+#
+###################################################################################################
+###################################################################################################
+###################################################################################################
 #
