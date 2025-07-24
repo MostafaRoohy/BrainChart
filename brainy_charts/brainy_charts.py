@@ -13,21 +13,20 @@ from IPython.display import clear_output
 import pandas as pd
 from .chart_data import ChartData
 import json
-#var datafeedUrl = "http://localhost:8001";
+#
 ###################################################################################################
 ###################################################################################################
 ################################################################################################### BrainyChart
 #
-
 class BrainyChart:
 
-    def __init__(self, chart_data_list: Optional[List[ChartData]]=None, port=8000, verbose:bool=False, jupyter:bool=True):
+    def __init__(self, chart_data_list:Optional[List[ChartData]]=None, port=8000, verbose:bool=False, jupyter:bool=True):
         
         package_dir  = Path(__file__).parent
         datafeed_dir = package_dir / "backend" / "datafeed"
         datafeed_dir.mkdir(parents=True, exist_ok=True)
 
-        if chart_data_list is not None:
+        if (chart_data_list is not None):
             
             registry = {}
 
@@ -54,28 +53,28 @@ class BrainyChart:
         self._jupyter = jupyter
     #
 
-    def chart_data_as_dict(self, chart_data: ChartData) -> dict:
+    def chart_data_as_dict(self, chart_data:ChartData) -> dict:
 
         return {
-            "name": chart_data.name,
-            "ticker": chart_data.ticker,
-            "full_name": chart_data.full_name,
-            "description": chart_data.description,
-            "type": chart_data.type,
-            "exchange": chart_data.exchange,
-            "listed_exchange": chart_data.listed_exchange,
-            "session": chart_data.session,
-            "timezone": chart_data.timezone,
-            "minmov": chart_data.minmov,
-            "minmov2": chart_data.minmov2,
-            "pricescale": chart_data.pricescale,
-            "pointvalue": chart_data.pointvalue,
-            "has_intraday": chart_data.has_intraday,
-            "has_daily": chart_data.has_daily,
-            "has_weekly_and_monthly": chart_data.has_weekly_and_monthly,
-            "currency_code": chart_data.currency_code,
-            "visible_plots_set": chart_data.visible_plots_set,
-            "supported_resolutions": chart_data.supported_resolutions
+            "name"                   : chart_data.name,
+            "ticker"                 : chart_data.ticker,
+            "full_name"              : chart_data.full_name,
+            "description"            : chart_data.description,
+            "type"                   : chart_data.type,
+            "exchange"               : chart_data.exchange,
+            "listed_exchange"        : chart_data.listed_exchange,
+            "session"                : chart_data.session,
+            "timezone"               : chart_data.timezone,
+            "minmov"                 : chart_data.minmov,
+            "minmov2"                : chart_data.minmov2,
+            "pricescale"             : chart_data.pricescale,
+            "pointvalue"             : chart_data.pointvalue,
+            "has_intraday"           : chart_data.has_intraday,
+            "has_daily"              : chart_data.has_daily,
+            "has_weekly_and_monthly" : chart_data.has_weekly_and_monthly,
+            "currency_code"          : chart_data.currency_code,
+            "visible_plots_set"      : chart_data.visible_plots_set,
+            "supported_resolutions"  : chart_data.supported_resolutions
         }
     #
 

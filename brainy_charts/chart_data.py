@@ -39,7 +39,6 @@ class ChartData:
         ChartData.instances_count  += 1
         
         self.tohlcv_df              = tohlcv_df
-        # self.serving_file_name      = f"{name}_{ticker}_{exchange}_{ChartData.instances_count}"
         self.name                   = f"{ticker}_{exchange}"
         self.ticker                 = ticker
         self.full_name              = full_name
