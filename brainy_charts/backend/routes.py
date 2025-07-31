@@ -217,7 +217,7 @@ async def get_history(
 
             return JSONResponse(content={
                 "s": "ok",
-                "t": filtered_df['timestamp'].astype(int).tolist(),
+                "t": (filtered_df['timestamp'] // 1000).astype(int).tolist(),
                 "o": data['open'],
                 "h": data['high'],
                 "l": data['low'],
