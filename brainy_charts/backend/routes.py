@@ -1,3 +1,9 @@
+# This file contains all the backend's API endpoints or "routes",
+# handling HTTP requests for chart data, symbol information, and saving or loading shapes.
+###################################################################################################
+###################################################################################################
+###################################################################################################
+#
 import time
 import json
 import pandas as pd
@@ -12,8 +18,7 @@ from sqlalchemy.orm import Session
 ###################################################################################################
 ###################################################################################################
 #
-from .database.database import get_db
-from .database.database import SessionLocal
+from .database import get_db, SessionLocal
 from .models import Chart, Shape
 from .schemas import ShapeCreate, ShapeResponse
 import json
@@ -29,10 +34,12 @@ DATAFEED_DIR = Path(__file__).parent / "datafeed"
 def load_registry():
 
     registry_path = DATAFEED_DIR / "registry.json"
-    if not registry_path.exists():
+    
+    if (not registry_path.exists()):
 
         raise HTTPException(500, detail="No registry.json found")
     #
+
     with open(registry_path) as f:
 
         return json.load(f)
@@ -44,7 +51,7 @@ def load_symbol_metadata(symbol_id: str):
     registry = load_registry()
     meta     = registry.get(symbol_id)
 
-    if not meta:
+    if (not meta):
 
         raise HTTPException(404, detail=f"Symbol '{symbol_id}' not found in registry")
     #
@@ -56,7 +63,7 @@ def load_symbol_data(symbol_id: str):
 
     csv_path = DATAFEED_DIR / f"{symbol_id}.csv"
 
-    if not csv_path.exists():
+    if (not csv_path.exists()):
 
         raise HTTPException(404, detail=f"No OHLCV data for symbol: {symbol_id}")
     #
@@ -74,43 +81,58 @@ async def root():
 ###################################################################################################
 #
 @router.get("/search")
-async def search_symbols(
-    query: str = "",
-    type: Optional[str] = None,
-    exchange: Optional[str] = None,
-    limit: Optional[int] = None
-):
+async def search_symbols(query:str="", type:Optional[str]=None, exchange:Optional[str]=None, limit:Optional[int]=None):
+    
     registry = load_registry()
-    matches = []
-    for symbol_id, meta in registry.items():
-        if query.lower() in symbol_id.lower():
+    matches  = []
 
-            if exchange and meta.get("exchange", "").lower() != exchange.lower():
+    for symbol_id, meta in registry.items():
+
+        if (query.lower() in symbol_id.lower()):
+
+            if (exchange and meta.get("exchange", "").lower() != exchange.lower()):
+                
                 continue
-            if type and meta.get("type", "crypto").lower() != type.lower():
+            #
+            
+            if (type and meta.get("type", "crypto").lower() != type.lower()):
+                
                 continue
+            #
+
             matches.append({
-                "symbol": symbol_id,
-                "full_name": meta.get("full_name", meta.get("name", symbol_id)),
-                "description": meta.get("description", ""),
-                "exchange": meta.get("exchange", ""),
-                "type": meta.get("type", "crypto"),
-                "ticker": symbol_id
+                "symbol"      : symbol_id,
+                "full_name"   : meta.get("full_name", meta.get("name", symbol_id)),
+                "description" : meta.get("description", ""),
+                "exchange"    : meta.get("exchange", ""),
+                "type"        : meta.get("type", "crypto"),
+                "ticker"      : symbol_id
             })
-    if limit:
+        #
+    #
+
+    if (limit):
+
         matches = matches[:limit]
-    # return {"symbols": matches}
-    return matches
+    #
+
+    return (matches)
 #
 
 @router.get("/symbols")
 async def get_symbols(symbol:str):
+
     try:
+
         meta = load_symbol_metadata(symbol)
+    #
     except HTTPException as e:
+
         return {"s": "error", "errmsg": str(e.detail)}
+    #
     
     meta = load_symbol_metadata(symbol)
+
     return {
         # "s": "ok",
         "name": meta.get("name"),
@@ -140,11 +162,16 @@ async def get_symbols(symbol:str):
 async def get_symbol_info(symbol: str):
 
     try:
+
         meta = load_symbol_metadata(symbol)
+    #
     except HTTPException as e:
+
         return {"s": "error", "errmsg": str(e.detail)}
+    #
     
     meta = load_symbol_metadata(symbol)
+
     return {
         # "s": "ok",
         "name": meta.get("name"),
@@ -171,27 +198,28 @@ async def get_symbol_info(symbol: str):
 #
 
 @router.get("/history")
-async def get_history(
-    symbol: str,
-    resolution: str,
-    from_time: int = Query(..., alias="from", description="Start time of the data"),
-    to_time: int = Query(..., alias="to", description="End time of the data"),
-    countback: Optional[int] = None
-):
+async def get_history(symbol:str, resolution:str, from_time :int=Query(..., alias="from", description="Start time of the data"), to_time:int=Query(..., alias="to", description="End time of the data"), countback:Optional[int]=None):
     try:
+
         if not symbol:
+
             raise HTTPException(status_code=400, detail="Symbol parameter is required")
+        #
 
         df = load_symbol_data(symbol)
 
         from_time = from_time * 1000
-        to_time = to_time * 1000
+        to_time   = to_time   * 1000
 
         if from_time > 0 or to_time > 0:
+
             if countback:
+
                 filtered_df = df.tail(countback)
+            #
 
             if resolution == '1D':
+
                 df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
                 df = df.set_index('timestamp').resample('D').agg({
                     'open': 'first',
@@ -201,19 +229,22 @@ async def get_history(
                     'volume': 'sum'
                 }).reset_index()
                 df['timestamp'] = df['timestamp'].astype(np.int64) // 10**6
+            #
 
-            mask = (df['timestamp'] >= from_time) & (df['timestamp'] <= to_time)
+            mask        = (df['timestamp'] >= from_time) & (df['timestamp'] <= to_time)
             filtered_df = df[mask]
             filtered_df = filtered_df.dropna()
             filtered_df = filtered_df.sort_values(by='timestamp')
             filtered_df = filtered_df.drop_duplicates(subset='timestamp')
 
-            if filtered_df.empty  or   len(filtered_df) == 0:
-                return JSONResponse(content={"s": "no_data", "nextTime": from_time})
+            if (filtered_df.empty  or   len(filtered_df) == 0):
 
-            data = filtered_df.to_dict(orient='list')
+                return JSONResponse(content={"s": "no_data", "nextTime": from_time})
+            #
+
+            data              = filtered_df.to_dict(orient='list')
             data['timestamp'] = [ts // 1000 for ts in data['timestamp']]
-            data['volume'] = [0 if pd.isna(v) else v for v in data['volume']]
+            data['volume']    = [0 if pd.isna(v) else v for v in data['volume']]
 
             return JSONResponse(content={
                 "s": "ok",
@@ -224,18 +255,28 @@ async def get_history(
                 "c": data['close'],
                 "v": data['volume']
             })
+        #
         else:
+
             return JSONResponse(content={"s": "no_data", "nextTime": from_time})
+        #
+    #
     except Exception as e:
+
         return JSONResponse(content={"s": "error", "errmsg": str(e)})
+    #
 #
 
 @router.get("/config")
 async def get_config():
-    registry = load_registry()
+
+    registry        = load_registry()
     all_resolutions = set()
     for meta in registry.values():
+
         all_resolutions.update(meta.get("supported_resolutions", []))
+    #
+
     return {
         "supported_resolutions": sorted(list(all_resolutions)),
         "supports_group_request": False,
@@ -255,43 +296,59 @@ async def get_config():
 
 @router.get("/time")
 async def get_server_time(symbol: Optional[str] = None):
-    if symbol:
+
+    if (symbol):
+
         try:
+
             df = load_symbol_data(symbol)
             return int(df['timestamp'].max() // 1000)
+        #
         except Exception as e:
+
             return {"s": "error", "errmsg": str(e)}
+        #
+    #
 
     # Fallback: return latest timestamp across all symbols
     try:
+
         registry = load_registry()
-        latest = 0
+        latest   = 0
+
         for sym_id in registry:
+
             df = load_symbol_data(sym_id)
             ts = df['timestamp'].max()
-            if ts > latest:
+
+            if (ts > latest):
+
                 latest = ts
-        return int(latest // 1000)
+            #
+        #
+
+        return (int(latest // 1000))
+    #
     except Exception as e:
+
         return {"s": "error", "errmsg": str(e)}
+    #
 #
 ###################################################################################################
 ###################################################################################################
 ###################################################################################################
 #
 @router.post("/charts/{chart_id}/shapes/", response_model=ShapeResponse)
-async def create_shape(
-    chart_id: int, 
-    shape: ShapeCreate, 
-    db: Session = Depends(get_db)
-    ):
+async def create_shape(chart_id:int, shape:ShapeCreate, db:Session=Depends(get_db)):
 
     chart = db.query(Chart).get(chart_id)
     if not chart:
+
         chart = Chart(id=chart_id, name=f"Auto-Created Chart {chart_id}")
         db.add(chart)
         db.commit()
         db.refresh(chart)
+    #
 
     existing_shape = db.query(Shape).filter(
         Shape.shape_code == shape.shape_code,
@@ -300,21 +357,26 @@ async def create_shape(
 
     print('== ext', existing_shape.shape_code if existing_shape else '== None')
 
-    if existing_shape:
+    if (existing_shape):
+
         print('== code', existing_shape.shape_code)
         for key, value in shape.model_dump().items():
+
             print('-- dict', key, '--', value)
                   
             setattr(existing_shape, key, value)
+        #
+
         db.commit()
         print('===============================')
         print('== upd', existing_shape.shape_code, existing_shape.shape_id)
 
         db.refresh(existing_shape)
         db.close()
-        return existing_shape
-    
+        return (existing_shape)
+    #
     else:  # Create New Shape
+
         db_shape = Shape(**shape.model_dump(), chart_id=chart_id)
         print('== new', shape.model_dump())
 
@@ -322,27 +384,27 @@ async def create_shape(
         db.commit()
         db.refresh(db_shape)
         db.close()
-        return db_shape
+        return (db_shape)
+    #
 #
 
 @router.get("/charts/{chart_id}/shapes/", response_model=list[ShapeResponse])
-async def get_chart_shapes(
-    chart_id: int, 
-    db: Session = Depends(get_db)
-    ):
+async def get_chart_shapes(chart_id:int, db:Session=Depends(get_db)):
     
     chart = db.query(Chart).get(chart_id)
-    if not chart:
+    if (not chart):
+
         chart = Chart(id=chart_id, name=f"Auto-Created Chart {chart_id}")
         db.add(chart)
         db.commit()
         db.refresh(chart)
+    #
     
     shapes = db.query(Shape).filter(Shape.chart_id == chart_id).all()
     [print('== get ', shape.shape_id, shape.shape_code) for shape in shapes]
 
     db.close()
-    return shapes
+    return (shapes)
 #
 
 @router.get("/charts/{chart_id}/shapes/{shape_code}", response_model=ShapeResponse)
@@ -369,11 +431,7 @@ async def get_shape(
 #
 
 @router.delete("/charts/{chart_id}/shapes/{shape_code}")
-async def delete_shape(
-    chart_id: int, 
-    shape_code: int, 
-    db: Session = Depends(get_db)
-    ):
+async def delete_shape(chart_id:int, shape_code:int, db:Session=Depends(get_db)):
 
     print('== del ', shape_code, chart_id)
     shape = db.query(Shape).filter(
@@ -381,8 +439,10 @@ async def delete_shape(
         Shape.chart_id == chart_id
     ).first()
     
-    if not shape:
+    if (not shape):
+
         raise HTTPException(404, "Shape not found")
+    #
     
     db.delete(shape)
     db.commit()
@@ -391,34 +451,38 @@ async def delete_shape(
 #
 
 @router.delete("/charts/{chart_id}/shapes/")
-async def delete_all_shapes_in_chart(
-    chart_id: int,
-    db: Session = Depends(get_db)
-    ):
+async def delete_all_shapes_in_chart(chart_id:int, db:Session=Depends(get_db)):
     
     chart = db.query(Chart).get(chart_id)
-    if not chart:
+    if (not chart):
+
         db.close()
         raise HTTPException(status_code=404, detail="Chart not found")
-    
+    #
+
     try:
+
         deleted_count = db.query(Shape)\
             .filter(Shape.chart_id == chart_id)\
             .delete()
-        
+        #
+
         db.commit()
         return {
             "status": "success",
             "deleted_shapes": deleted_count,
             "chart_id": chart_id
         }
-        
+    #
     except Exception as e:
+
         db.rollback()
         raise HTTPException(500, f"Error deleting shapes: {str(e)}")
-        
+    #
     finally:
+
         db.close()
+    #
 #
 ###################################################################################################
 ###################################################################################################

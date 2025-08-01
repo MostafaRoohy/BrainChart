@@ -1,3 +1,13 @@
+# Contains the SQLAlchemy (or other ORM) models.
+# These define the actual database tables and their relationships.
+# Think of this as the database-layer definition.
+# Defines how your data is stored in the database (the database schema).
+# This module defines the database table schemas using the SQLAlchemy ORM,
+# specifying the structure for tables like charts and shapes.
+###################################################################################################
+###################################################################################################
+###################################################################################################
+#
 from sqlalchemy import Column, Integer, String, JSON, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -38,3 +48,4 @@ class Shape(Base):
 ###################################################################################################
 ###################################################################################################
 #
+

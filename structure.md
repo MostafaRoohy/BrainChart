@@ -6,25 +6,32 @@ BrainyCharts
 ├── brainy_charts/ # Anything we code, is here. All the wrapper functionalities.
 │   |
 │   ├── __init__.py
-│   ├── brainy_chart.py
-│   ├── brainy_shape.py
-│   ├── chart_data.py
+│   ├── brainy_charts.py
 |   |
 │   └── backend/
 |       |
 |       ├── __init__.py
+|       ├── database.py
 |       ├── main.py
 |       ├── models.py
 |       ├── routes.py
 |       ├── schemas.py
 |       |
+|       ├── database/
+|       |   |
+|       |   ├── migrations/
+|       |   |   |
+|       |   |   └──*
+|       |   ├──alembic.ini
+|       |   └──tradingview.db
+|       |
 |       ├── datafeed/
 |       |   |
-|       |   └──*
+|       |   ├──symbol1.scv
+|       |   ├──sym65.csv
+|       |   ├──examplesymbol.csv
+|       |   └──registry.json
 |       |
-|       ├── migrations/
-|       |   |
-|       |   └──*
 |       └────────────────────
 │
 │

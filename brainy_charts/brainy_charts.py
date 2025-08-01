@@ -1,3 +1,9 @@
+# This module provides the main user-facing classes, BrainyChart,
+# which is used to start the charting application and interact with its drawing features.
+###################################################################################################
+###################################################################################################
+###################################################################################################
+#
 import os
 import sys
 import subprocess
@@ -7,12 +13,11 @@ import time
 import random
 import logging
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Literal
 from IPython.display import IFrame
 from IPython.display import clear_output
 import pandas as pd
 import json
-from typing import List, Dict, Optional, Literal
 #
 ###################################################################################################
 ###################################################################################################

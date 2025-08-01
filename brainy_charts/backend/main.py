@@ -1,3 +1,10 @@
+# This is the entry point for the FastAPI application,
+# where the app is initialized, middleware is configured,
+# and all the API endpoints from routes.py are included.
+###################################################################################################
+###################################################################################################
+###################################################################################################
+#
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -10,7 +17,7 @@ from typing import List, Optional
 #
 from .routes import router
 from .models import Base
-from .database.database import engine
+from .database import engine
 #
 ###################################################################################################
 ###################################################################################################
