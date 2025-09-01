@@ -224,7 +224,7 @@ class BrainyChart:
 
                 subprocess.Popen(
                     cmd,
-                    cwd=f"{package_dir}/charting_library",
+                    cwd=f"{package_dir}/brainy_charts",
                     shell=shell,
                 )
             #
@@ -233,7 +233,7 @@ class BrainyChart:
                 with open(os.devnull, 'w') as fnull:
                     subprocess.Popen(
                         cmd,
-                        cwd=f"{package_dir}/charting_library",
+                        cwd=f"{package_dir}/brainy_charts",
                         shell=shell,
                         stdout=fnull,
                         stderr=fnull
