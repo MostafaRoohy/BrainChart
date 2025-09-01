@@ -1,0 +1,88 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>BrainyCharts</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+		<script type="text/javascript" src="charting_library/charting_library.standalone.js"></script>
+		<script type="text/javascript" src="datafeeds/udf/dist/bundle.js"></script>
+		<script type="text/javascript">
+			function getParameterByName(name) {
+				name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+				var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+					results = regex.exec(location.search);
+				return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+			}
+
+			function initOnReady() {
+				var datafeedUrl = "http://localhost:8001";
+				var widget = window.tvWidget = new TradingView.widget({
+					fullscreen: true,
+					symbol: getParameterByName('symbol') || 'CryBB_DEx',
+					interval: '1D',
+					container: "tv_chart_container",
+					datafeed: new Datafeeds.UDFCompatibleDatafeed(datafeedUrl),
+					library_path: "charting_library/",
+					locale: getParameterByName('lang') || "en",
+					disabled_features: ["use_localstorage_for_settings", "study_templates"],
+					theme: 'dark',
+				});
+
+                widget.onChartReady(function() {
+                    // This is the correct chart object, as demonstrated by your working file.
+                    var chart = widget.activeChart();
+
+                    const loadShapesForSymbol = (symbol) => {
+                        const backendUrl = 'http://localhost:8001';
+                        console.log(`Fetching shapes for symbol: ${symbol}`);
+
+                        fetch(`${backendUrl}/shapes/${symbol}`)
+                            .then(response => {
+                                if (!response.ok) throw new Error('Network response was not ok');
+                                return response.json();
+                            })
+                            .then(shapes => {
+                                console.log(`Received ${shapes.length} shapes for symbol ${symbol}:`, shapes);
+                                
+                                // Use the correct method from your working file to remove all existing shapes.
+                                chart.removeAllShapes();
+
+                                if (shapes && shapes.length > 0) {
+                                    shapes.forEach(shape => {
+                                        // --- THE DEFINITIVE FIX ---
+                                        // Differentiate between single and multi-point shapes,
+                                        // as shown in your working index.html file.
+                                        if (shape.points.length === 1) {
+                                            chart.createShape(shape.points[0], {
+                                                shape: shape.shape_type,
+                                                overrides: shape.properties
+                                            });
+                                        } else {
+                                            chart.createMultipointShape(shape.points, {
+                                                shape: shape.shape_type,
+                                                overrides: shape.properties
+                                            });
+                                        }
+                                    });
+                                }
+                            })
+                            .catch(error => console.error('Error handling shapes:', error));
+                    };
+
+                    const initialSymbol = widget.symbolInterval().symbol;
+                    loadShapesForSymbol(initialSymbol);
+
+                    chart.onSymbolChanged().subscribe(null, () => {
+                        const newSymbol = widget.symbolInterval().symbol;
+                        console.log(`Symbol changed to: ${newSymbol}`);
+                        loadShapesForSymbol(newSymbol);
+                    });
+                });
+			};
+
+			window.addEventListener('DOMContentLoaded', initOnReady, false);
+		</script>
+	</head>
+	<body style="margin:0px;">
+		<div id="tv_chart_container"></div>
+	</body>
+</html>
