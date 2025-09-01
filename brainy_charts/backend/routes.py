@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 #
 from .database import get_db, SessionLocal
 from .models import Chart, Shape
-from .schemas import ShapeCreate, ShapeResponse
+from .schemas import ShapeCreate, ShapeResponse, ShapeAPIResponse
 import json
 from pathlib import Path
 #
@@ -144,6 +144,7 @@ async def get_symbols(symbol:str):
         "pointvalue": meta.get("pointvalue", 1),
         "session": meta.get("session", "24x7"),
         "has_intraday": meta.get("has_intraday", True),
+        "has_seconds": meta.get("has_seconds", True),
         "has_daily": meta.get("has_daily", True),
         "has_weekly_and_monthly": meta.get("has_weekly_and_monthly", True),
         "visible_plots_set": meta.get("visible_plots_set", "ohlcv"),
@@ -188,6 +189,7 @@ async def get_symbol_info(symbol: str):
         "minmov2": meta.get("minmov2", 0),
         "pricescale": meta.get("pricescale", 100),
         "pointvalue": meta.get("pointvalue", 1),
+        "has_seconds": meta.get("has_seconds", True),
         "has_intraday": meta.get("has_intraday", True),
         "has_daily": meta.get("has_daily", True),
         "has_weekly_and_monthly": meta.get("has_weekly_and_monthly", True),
@@ -338,151 +340,123 @@ async def get_server_time(symbol: Optional[str] = None):
 ###################################################################################################
 ###################################################################################################
 #
-@router.post("/charts/{chart_id}/shapes/", response_model=ShapeResponse)
-async def create_shape(chart_id:int, shape:ShapeCreate, db:Session=Depends(get_db)):
+def get_or_create_chart(db: Session, symbol: str) -> Chart:
+    
+    """Helper function to find a chart by symbol or create it if it doesn't exist."""
+    
+    chart = db.query(Chart).filter(Chart.symbol == symbol).first()
 
-    chart = db.query(Chart).get(chart_id)
-    if not chart:
+    if (not chart):
 
-        chart = Chart(id=chart_id, name=f"Auto-Created Chart {chart_id}")
+        chart = Chart(symbol=symbol, name=symbol)
         db.add(chart)
         db.commit()
         db.refresh(chart)
     #
+
+    return chart
+#
+
+@router.post("/shapes/{symbol}", response_model=ShapeResponse)
+async def create_shape(symbol: str, shape: ShapeCreate, db: Session = Depends(get_db)):
+    
+    chart = get_or_create_chart(db, symbol)
 
     existing_shape = db.query(Shape).filter(
         Shape.shape_code == shape.shape_code,
-        Shape.chart_id == chart_id
+        Shape.chart_id == chart.id
     ).first()
-
-    print('== ext', existing_shape.shape_code if existing_shape else '== None')
 
     if (existing_shape):
 
-        print('== code', existing_shape.shape_code)
-        for key, value in shape.model_dump().items():
-
-            print('-- dict', key, '--', value)
-                  
-            setattr(existing_shape, key, value)
-        #
-
+        existing_shape.shape_data = shape.shape_data
         db.commit()
-        print('===============================')
-        print('== upd', existing_shape.shape_code, existing_shape.shape_id)
-
         db.refresh(existing_shape)
-        db.close()
-        return (existing_shape)
+        return existing_shape
     #
-    else:  # Create New Shape
+    else:
 
-        db_shape = Shape(**shape.model_dump(), chart_id=chart_id)
-        print('== new', shape.model_dump())
-
+        db_shape = Shape(**shape.model_dump(), chart_id=chart.id)
         db.add(db_shape)
         db.commit()
         db.refresh(db_shape)
-        db.close()
-        return (db_shape)
+        return db_shape
     #
 #
 
-@router.get("/charts/{chart_id}/shapes/", response_model=list[ShapeResponse])
-async def get_chart_shapes(chart_id:int, db:Session=Depends(get_db)):
-    
-    chart = db.query(Chart).get(chart_id)
-    if (not chart):
+@router.get("/shapes/{symbol}", response_model=list[ShapeAPIResponse])
+async def get_shapes_for_symbol(symbol: str, db: Session = Depends(get_db)):
 
-        chart = Chart(id=chart_id, name=f"Auto-Created Chart {chart_id}")
-        db.add(chart)
-        db.commit()
-        db.refresh(chart)
-    #
-    
-    shapes = db.query(Shape).filter(Shape.chart_id == chart_id).all()
-    [print('== get ', shape.shape_id, shape.shape_code) for shape in shapes]
+    chart = db.query(Chart).filter(Chart.symbol == symbol).first()
 
-    db.close()
-    return (shapes)
-#
-
-@router.get("/charts/{chart_id}/shapes/{shape_code}", response_model=ShapeResponse)
-async def get_shape(
-    chart_id: int,
-    shape_code: str,
-    db: Session = Depends(get_db)
-):
-
-    chart = db.query(Chart).get(chart_id)
     if not chart:
-        raise HTTPException(status_code=404, detail="Chart not found")
+
+        return []
+    #
+
+    db_shapes = db.query(Shape).filter(Shape.chart_id == chart.id).all()
     
-    shape = db.query(Shape).filter(
-        Shape.chart_id == chart_id,
-        Shape.shape_code == shape_code
-    ).first()
-    
-    if not shape:
-        raise HTTPException(status_code=404, detail="Shape not found")
-    
-    print(f'== Get single shape: {shape.shape_id}, {shape.shape_code}')
-    return shape
+    api_shapes = []
+    for shape in db_shapes:
+
+        api_shapes.append(ShapeAPIResponse(
+            id=shape.id,
+            shape_id=shape.shape_id,
+            shape_code=shape.shape_code,
+            shape_type=shape.shape_type,
+            points=shape.shape_data.get("points", []),
+            properties=shape.shape_data.get("properties", {})
+        ))
+    #
+
+    return api_shapes
 #
 
-@router.delete("/charts/{chart_id}/shapes/{shape_code}")
-async def delete_shape(chart_id:int, shape_code:int, db:Session=Depends(get_db)):
+@router.delete("/shapes/{symbol}/{shape_code}")
+async def delete_shape(symbol: str, shape_code: int, db: Session = Depends(get_db)):
 
-    print('== del ', shape_code, chart_id)
+    chart = get_or_create_chart(db, symbol)
+
     shape = db.query(Shape).filter(
-        Shape.shape_code == shape_code,
-        Shape.chart_id == chart_id
+        Shape.chart_id == chart.id,
+        Shape.shape_code == shape_code
     ).first()
     
     if (not shape):
 
-        raise HTTPException(404, "Shape not found")
+        raise HTTPException(status_code=404, detail="Shape not found")
     #
-    
+
     db.delete(shape)
     db.commit()
-    db.close()
-    return {"status": "deleted"}
+    return {"status": "deleted", "shape_code": shape_code}
 #
 
-@router.delete("/charts/{chart_id}/shapes/")
-async def delete_all_shapes_in_chart(chart_id:int, db:Session=Depends(get_db)):
+@router.delete("/shapes/{symbol}")
+async def delete_all_shapes_for_symbol(symbol: str, db: Session = Depends(get_db)):
+
+    """Deletes all shapes associated with a given symbol."""
+
+    chart = db.query(Chart).filter(Chart.symbol == symbol).first()
     
-    chart = db.query(Chart).get(chart_id)
-    if (not chart):
+    if not chart:
 
-        db.close()
-        raise HTTPException(status_code=404, detail="Chart not found")
-    #
-
-    try:
-
-        deleted_count = db.query(Shape)\
-            .filter(Shape.chart_id == chart_id)\
-            .delete()
-        #
-
-        db.commit()
         return {
             "status": "success",
-            "deleted_shapes": deleted_count,
-            "chart_id": chart_id
+            "message": f"Chart for symbol '{symbol}' not found, no shapes to delete.",
+            "deleted_count": 0
         }
     #
-    except Exception as e:
 
-        db.rollback()
-        raise HTTPException(500, f"Error deleting shapes: {str(e)}")
-    #
-    finally:
-
-        db.close()
-    #
+    # Perform the deletion
+    deleted_count = db.query(Shape).filter(Shape.chart_id == chart.id).delete()
+    db.commit()
+    
+    return {
+        "status": "success",
+        "message": f"All {deleted_count} shapes for symbol '{symbol}' have been deleted.",
+        "deleted_count": deleted_count
+    }
 #
 ###################################################################################################
 ###################################################################################################

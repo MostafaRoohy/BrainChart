@@ -8,7 +8,7 @@
 ###################################################################################################
 ###################################################################################################
 #
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Any, Optional, List, Dict
 from datetime import datetime
 #
@@ -47,8 +47,18 @@ class ShapeResponse(ShapeBase):
 
     class Config:
 
-        orm_mode = True
+        from_attributes = True
     #
+#
+
+class ShapeAPIResponse(BaseModel):
+
+    id         : int
+    shape_id   : Optional[str]        = None
+    shape_code : int
+    shape_type : str
+    points     : List[Dict[str, Any]] = Field(default_factory=list)
+    properties : Dict[str, Any]       = Field(default_factory=dict)
 #
 ###################################################################################################
 ###################################################################################################
