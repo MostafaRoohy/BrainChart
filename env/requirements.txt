@@ -1,0 +1,10 @@
+python=3.12
+ipykernel
+ipython
+fastapi
+numpy
+pandas
+pydantic
+requests
+uvicorn
+SQLAlchemy
