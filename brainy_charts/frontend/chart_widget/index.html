@@ -7,8 +7,8 @@
 		<!-- Fix for iOS Safari zooming bug -->
 		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
 
-		<script type="text/javascript" src="charting_library/charting_library.standalone.js"></script>
-		<script type="text/javascript" src="datafeeds/udf/dist/bundle.js"></script>
+		<script type="text/javascript" src="/charting_library/charting_library/charting_library.standalone.js"></script>
+		<script type="text/javascript" src="/charting_library/datafeeds/udf/dist/bundle.js"></script>
 
 		<script type="text/javascript">
 
@@ -21,7 +21,7 @@
 
 			function initOnReady() {
 				// var datafeedUrl = "https://demo-feed-data.tradingview.com";
-                var datafeedUrl = "http://localhost:8001";
+                var datafeedUrl = window.location.origin;
 				var customDataUrl = getParameterByName('dataUrl');
 				if (customDataUrl !== "") {
 					datafeedUrl = customDataUrl.startsWith('https://') ? customDataUrl : `https://${customDataUrl}`;
@@ -39,7 +39,7 @@
 						maxResponseLength: 1000,
 						expectedOrder: 'latestFirst',
 					}),
-					library_path: "charting_library/",
+					library_path: "/charting_library/charting_library/",
 					locale: getParameterByName('lang') || "en",
 
 					disabled_features: ["use_localstorage_for_settings"],

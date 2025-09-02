@@ -53,7 +53,7 @@ multi_point_shapes = [
 #
 class BrainyChart:
 
-    def __init__(self, chart_data_list:List[ChartData], frontend_port=8000, backend_port=8001, verbose:bool=False, jupyter:bool=True):
+    def __init__(self, chart_data_list:List[ChartData], frontend_port=8000, backend_port=8000, verbose:bool=False, jupyter:bool=True):
         
         package_dir  = Path(__file__).parent
         datafeed_dir = package_dir / "backend" / "datafeed"
@@ -176,53 +176,11 @@ class BrainyChart:
         #
     #
 
-    def run_frontend(self):
-
-        try:
-
-            print(f"Starting frontend server on port {self.frontend_port}...")
-
-            package_dir = Path(__file__).parent.parent
-            cmd = [
-                "python3", 
-                "-m",
-                "http.server",
-                f"{self.frontend_port}",
-            ]
-            shell = False
-
-            if (self.verbose==True):
-
-                subprocess.Popen(
-                    cmd,
-                    cwd=f"{package_dir}/charting_library",
-                    shell=shell,
-                )
-            #
-            else:
-
-                with open(os.devnull, 'w') as fnull:
-                    subprocess.Popen(
-                        cmd,
-                        cwd=f"{package_dir}/charting_library",
-                        shell=shell,
-                        stdout=fnull,
-                        stderr=fnull
-                    )
-                #
-            #
-        #
-        except Exception as e:
-
-            print(f"Error running frontend server: {e}")
-        #
-    #
-
     def imagine(self, width=1200, height=600):
 
         self.kill_servers()
         self.run_backend()
-        self.run_frontend()
+
         print("Please wait...")
         time.sleep(4)
 
