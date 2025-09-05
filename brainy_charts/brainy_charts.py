@@ -28,6 +28,8 @@ one_point_shapes   = [
     "sticker"        , "arrow_up"         , "arrow_down"       , "flag"             , "vertical_line"    ,
     "horizontal_line", "long_position"    , "short_position"
 ]
+#
+
 multi_point_shapes = [
     "triangle"             , "curve"                  , "table"                  , "circle"                    , "ellipse"                , "path"                   , "polyline",
     "extended"             , "signpost"               , "double_curve"           , "arc"                       , "price_label"            , "price_note"             ,
@@ -47,47 +49,132 @@ multi_point_shapes = [
     "brush"                , "highlighter"            , "regression_trend"       , "fixed_range_volume_profile"
 ]
 #
+
+index_html_raw = r'''
+<!-- https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/#additional_symbol_info_fields -->
+
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+
+        <title>BrainyCharts</title>
+        
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+        <script type="text/javascript" src="/charting_library/charting_library/charting_library.standalone.js"></script>
+        <script type="text/javascript" src="/charting_library/datafeeds/udf/dist/bundle.js"></script>
+
+        <script type="text/javascript">
+
+            function getParameterByName(name) 
+            {{
+                name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+                var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                    results = regex.exec(location.search);
+                return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+            }}
+
+            function initOnReady() 
+            {{
+                var datafeedUrl   = window.location.origin;
+                var customDataUrl = getParameterByName('dataUrl');
+
+                if (customDataUrl !== "") 
+                {{
+                    datafeedUrl = customDataUrl.startsWith('https://') ? customDataUrl : `https://${{customDataUrl}}`;
+                }}
+
+
+                var widget = window.tvWidget = new TradingView.widget(
+                {{
+                    library_path : "/charting_library/charting_library/",
+                    container    : "tv_chart_container",
+                    datafeed     : new Datafeeds.UDFCompatibleDatafeed(datafeedUrl, undefined, {{maxResponseLength: 1000, expectedOrder: 'latestFirst'}}),
+                    
+                    fullscreen : true,
+                    theme      : '{theme}',
+
+                    symbol          : '{default_symbol}',
+                    interval        : '1',
+                    // https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/#load_last_chart
+                    // load_last_chart : true,
+
+                    <!-- https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets/ -->
+                    disabled_features : ["use_localstorage_for_settings"],
+                    enabled_features  : ["study_templates"],
+
+                    charts_storage_url         : 'https://saveload.tradingview.com',
+                    charts_storage_api_version : "1.1",
+
+                    // custom_indicators_getter: ???
+
+
+
+                }});
+
+
+                window.frames[0].focus();
+            }};
+
+            window.addEventListener('DOMContentLoaded', initOnReady, false);
+
+        </script>
+
+    </head>
+
+    <body style="margin:0px;">
+
+        <div id="tv_chart_container"></div>
+        
+    </body>
+
+</html>
+'''
+#
 ###################################################################################################
 ###################################################################################################
 ################################################################################################### BrainyChart
 #
 class BrainyChart:
 
-    def __init__(self, chart_data_list:List[ChartData], frontend_port=8000, backend_port=8000, verbose:bool=False, jupyter:bool=True):
+    def __init__(self, chart_data_list:List[ChartData], default_chart:ChartData=None, theme:str=['dark', 'light'], server_port=8000, verbose:bool=False, jupyter:bool=False):
         
+        if (chart_data_list is None):
+
+            raise
+        #
+
+
         package_dir  = Path(__file__).parent
         datafeed_dir = package_dir / "backend" / "datafeed"
         datafeed_dir.mkdir(parents=True, exist_ok=True)
-
-
-        if (chart_data_list is not None):
             
-            registry = {}
+        registry = {}
+        for chart_data in chart_data_list:
 
-            for chart_data in chart_data_list:
+            symbol_id           = f"{chart_data.ticker}_{chart_data.exchange}"
+            csv_path            = datafeed_dir / f"{symbol_id}.csv"
+            registry[symbol_id] = self.chart_data_as_dict(chart_data)
+            chart_data.tohlcv_df.to_csv(csv_path, index=False)
+        #
+        with open(datafeed_dir/"registry.json", "w") as f:
 
-                symbol_id                  = f"{chart_data.ticker}_{chart_data.exchange}"
-                
-                csv_path = datafeed_dir / f"{symbol_id}.csv"
-                chart_data.tohlcv_df.to_csv(csv_path, index=False)
+            json.dump(registry, f, indent=2)
+        #
+        with open(package_dir/"frontend"/"chart_widget"/"index.html", "w") as file:
 
-                registry[symbol_id] = self.chart_data_as_dict(chart_data)
-            #
+            theme          = (theme)              if (theme is not None)         else ("dark")
+            default_symbol = (default_chart.name) if (default_chart is not None) else (chart_data_list[0].name)
 
-            with open(datafeed_dir / "registry.json", "w") as f:
-
-                json.dump(registry, f, indent=2)
-            #
+            file.write(index_html_raw.format(theme=theme, default_symbol=default_symbol))
         #
 
-        self.frontend_port = frontend_port
-        self.frontend_url  = f"http://localhost:{self.frontend_port}"
 
-        self.backend_port  = backend_port
-        self.backend_url   = f"http://localhost:{backend_port}"
+        self.server_port = server_port
+        self.server_url  = f"http://localhost:{self.server_port}"
 
-        self.verbose       = verbose
-        self.jupyter       = jupyter
+        self.verbose     = verbose
+        self.jupyter     = jupyter
     #
 
     def chart_data_as_dict(self, chart_data:ChartData) -> dict:
@@ -117,31 +204,18 @@ class BrainyChart:
     #
     ##############################################################
     #
-    def kill_servers(self):
+    def run_servers(self):
 
         try:
 
-            subprocess.run(["pkill", "-f", "uvicorn"]    , check=True)
-            subprocess.run(["pkill", "-f", "http.server"], check=True)
-        #
-        except subprocess.CalledProcessError:
-
-            pass
-        #
-    #
-
-    def run_backend(self):
-
-        try:
-
-            print(f"Starting backend server on port {self.backend_port}...")
+            print(f"Starting server on port {self.server_port}...")
 
             package_dir = Path(__file__).parent
             cmd = [
                 "uvicorn", 
                 "backend.main:app",
                 "--host", "0.0.0.0",
-                "--port", str(self.backend_port)
+                "--port", str(self.server_port)
             ]
             shell = False
             
@@ -172,14 +246,27 @@ class BrainyChart:
         #
         except Exception as e:
 
-            print(f"Error running frontend server: {e}")
+            print(f"Error running server: {e}")
+        #
+    #
+
+    def kill_servers(self):
+
+        try:
+
+            subprocess.run(["pkill", "-f", "uvicorn"]    , check=True)
+            subprocess.run(["pkill", "-f", "http.server"], check=True)
+        #
+        except subprocess.CalledProcessError:
+
+            pass
         #
     #
 
     def imagine(self, width=1200, height=600):
 
         self.kill_servers()
-        self.run_backend()
+        self.run_servers()
 
         print("Please wait...")
         time.sleep(4)
@@ -193,10 +280,11 @@ class BrainyChart:
 
         if (self.jupyter):
 
-            return (IFrame(src=self.frontend_url, width=width, height=height))
+            return (IFrame(src=self.server_url, width=width, height=height))
         #
         else:
-
+            
+            print(f"Please navigate to: {self.server_url}")
             return (None)
         #
     #
@@ -231,7 +319,7 @@ class BrainyChart:
             "shape_data" : {"points":points, "properties":properties}
         }
         
-        url      = f"{self.backend_url}/shapes/{symbol_id}"
+        url      = f"{self.server_url}/shapes/{symbol_id}"
         response = requests.post(url, json=payload)
         response.raise_for_status()
         
@@ -247,7 +335,7 @@ class BrainyChart:
 
         symbol_id = f"{chart_data.ticker}_{chart_data.exchange}"
         
-        url       = f"{self.backend_url}/shapes/{symbol_id}"
+        url       = f"{self.server_url}/shapes/{symbol_id}"
         response  = requests.get(url)
         response.raise_for_status()
         return (response.json())
@@ -256,7 +344,7 @@ class BrainyChart:
     def get_shape(self, shape_code:int) -> Dict:
 
         chart_id = self.chart_id
-        url      = f"{self.backend_url}/charts/{chart_id}/shapes/{shape_code}"
+        url      = f"{self.server_url}/charts/{chart_id}/shapes/{shape_code}"
         
         try:
 
@@ -279,7 +367,7 @@ class BrainyChart:
         
         symbol_id = f"{chart_data.ticker}_{chart_data.exchange}"
 
-        url      = f"{self.backend_url}/shapes/{symbol_id}/{shape_code}"
+        url      = f"{self.server_url}/shapes/{symbol_id}/{shape_code}"
         response = requests.delete(url)
         response.raise_for_status()
 
@@ -289,7 +377,7 @@ class BrainyChart:
     def delete_all_shapes(self, chart_data:ChartData) -> Dict:
 
         symbol_id = f"{chart_data.ticker}_{chart_data.exchange}"
-        url       = f"{self.backend_url}/shapes/{symbol_id}"
+        url       = f"{self.server_url}/shapes/{symbol_id}"
         response = requests.delete(url)
         response.raise_for_status()
 
