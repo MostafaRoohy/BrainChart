@@ -17,7 +17,7 @@ from typing import List, Dict, Optional, Literal
 from IPython.display import IFrame
 from IPython.display import clear_output
 import json
-from .chart_data import ChartData
+from .chart import ChartData
 #
 ###################################################################################################
 ###################################################################################################
