@@ -1,8 +1,9 @@
-# This module provides the main user-facing classes, BrainyChart,
-# which is used to start the charting application and interact with its drawing features.
+#
+# The main user-facing classe, BrainyChart, which is used to start the application.
+#
 ###################################################################################################
 ###################################################################################################
-###################################################################################################
+################################################################################################### Modules
 #
 import os
 import sys
@@ -17,119 +18,14 @@ from typing import List, Dict, Optional, Literal
 from IPython.display import IFrame
 from IPython.display import clear_output
 import json
-from .chart import ChartData
 #
 ###################################################################################################
 ###################################################################################################
-################################################################################################### Shape Constants
+################################################################################################### Modules
 #
-one_point_shapes   = [
-    "emoji"          , "text"             , "icon"             , "anchored_text"    , "anchored_note"    , "note",
-    "sticker"        , "arrow_up"         , "arrow_down"       , "flag"             , "vertical_line"    ,
-    "horizontal_line", "long_position"    , "short_position"
-]
-#
-
-multi_point_shapes = [
-    "triangle"             , "curve"                  , "table"                  , "circle"                    , "ellipse"                , "path"                   , "polyline",
-    "extended"             , "signpost"               , "double_curve"           , "arc"                       , "price_label"            , "price_note"             ,
-    "arrow_marker"         , "cross_line"             , "horizontal_ray"         , "trend_line"                , "info_line"              ,
-    "trend_angle"          , "arrow"                  , "ray"                    , "parallel_channel"          , "disjoint_angle"         ,
-    "flat_bottom"          , "anchored_vwap"          , "pitchfork"              , "schiff_pitchfork_modified" , "schiff_pitchfork"       ,
-    "balloon"              , "comment"                , "inside_pitchfork"       , "pitchfan"                  ,
-    "gannbox"              , "gannbox_square"         , "gannbox_fixed"          , "gannbox_fan"               , "fib_retracement"        ,
-    "fib_trend_ext"        , "fib_speed_resist_fan"   , "fib_timezone"           , "fib_trend_time"            ,
-    "fib_circles"          , "fib_spiral"             , "fib_speed_resist_arcs"  , "fib_channel"               ,
-    "xabcd_pattern"        , "cypher_pattern"         , "abcd_pattern"           , "callout"                   , "text_note"              ,
-    "triangle_pattern"     , "3divers_pattern"        , "head_and_shoulders"     , "fib_wedge"                 ,
-    "elliott_impulse_wave" , "elliott_triangle_wave"  , "elliott_triple_combo"   ,
-    "elliott_correction"   , "elliott_double_combo"   , "cyclic_lines"           , "time_cycles"               ,
-    "sine_line"            , "forecast"               , "date_range"             , "price_range"               , "date_and_price_range"   ,
-    "bars_pattern"         , "ghost_feed"             , "projection"             , "rectangle"                 , "rotated_rectangle"      ,
-    "brush"                , "highlighter"            , "regression_trend"       , "fixed_range_volume_profile"
-]
-#
-
-index_html_raw = r'''
-<!-- https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/#additional_symbol_info_fields -->
-
-<!DOCTYPE HTML>
-<html>
-
-    <head>
-
-        <title>BrainyCharts</title>
-        
-        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
-        <script type="text/javascript" src="/charting_library/charting_library/charting_library.standalone.js"></script>
-        <script type="text/javascript" src="/charting_library/datafeeds/udf/dist/bundle.js"></script>
-
-        <script type="text/javascript">
-
-            function getParameterByName(name) 
-            {{
-                name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-                var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-                    results = regex.exec(location.search);
-                return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-            }}
-
-            function initOnReady() 
-            {{
-                var datafeedUrl   = window.location.origin;
-                var customDataUrl = getParameterByName('dataUrl');
-
-                if (customDataUrl !== "") 
-                {{
-                    datafeedUrl = customDataUrl.startsWith('https://') ? customDataUrl : `https://${{customDataUrl}}`;
-                }}
-
-
-                var widget = window.tvWidget = new TradingView.widget(
-                {{
-                    library_path : "/charting_library/charting_library/",
-                    container    : "tv_chart_container",
-                    datafeed     : new Datafeeds.UDFCompatibleDatafeed(datafeedUrl, undefined, {{maxResponseLength: 1000, expectedOrder: 'latestFirst'}}),
-                    
-                    fullscreen : true,
-                    theme      : '{theme}',
-
-                    symbol          : '{default_symbol}',
-                    interval        : '1',
-                    // https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/#load_last_chart
-                    // load_last_chart : true,
-
-                    <!-- https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets/ -->
-                    disabled_features : ["use_localstorage_for_settings"],
-                    enabled_features  : ["study_templates"],
-
-                    charts_storage_url         : 'https://saveload.tradingview.com',
-                    charts_storage_api_version : "1.1",
-
-                    // custom_indicators_getter: ???
-
-
-
-                }});
-
-
-                window.frames[0].focus();
-            }};
-
-            window.addEventListener('DOMContentLoaded', initOnReady, false);
-
-        </script>
-
-    </head>
-
-    <body style="margin:0px;">
-
-        <div id="tv_chart_container"></div>
-        
-    </body>
-
-</html>
-'''
+from .symbol       import Symbol
+from .chart_widget import index_html_raw
+from .shape        import multi_point_shapes, one_point_shapes
 #
 ###################################################################################################
 ###################################################################################################
@@ -137,7 +33,7 @@ index_html_raw = r'''
 #
 class BrainyChart:
 
-    def __init__(self, chart_data_list:List[ChartData], default_chart:ChartData=None, theme:str=['dark', 'light'], server_port=8000, verbose:bool=False, jupyter:bool=False):
+    def __init__(self, chart_data_list:List[Symbol], default_chart:Symbol=None, theme:str=['dark', 'light'], server_port=8000, verbose:bool=False, jupyter:bool=False):
         
         if (chart_data_list is None):
 
@@ -177,7 +73,7 @@ class BrainyChart:
         self.jupyter     = jupyter
     #
 
-    def chart_data_as_dict(self, chart_data:ChartData) -> dict:
+    def chart_data_as_dict(self, chart_data:Symbol) -> dict:
 
         return {
             "name"                   : chart_data.name,
@@ -295,7 +191,7 @@ class BrainyChart:
         return (random.randint(10**(length-1), (10**length)-1))
     #
 
-    def create_or_update_shape(self, chart_data:ChartData, shape_type:str, points:List[Dict[str, float]], properties:Dict, shape_code:Optional[int]=None, shape_id:Optional[str]=None) -> Dict:
+    def create_or_update_shape(self, chart_data:Symbol, shape_type:str, points:List[Dict[str, float]], properties:Dict, shape_code:Optional[int]=None, shape_id:Optional[str]=None) -> Dict:
         
         symbol_id  = f"{chart_data.ticker}_{chart_data.exchange}"
         shape_code = shape_code or self.generate_random_code()
@@ -331,7 +227,7 @@ class BrainyChart:
         }
     #
 
-    def get_all_shapes(self, chart_data:ChartData) -> List[Dict]:
+    def get_all_shapes(self, chart_data:Symbol) -> List[Dict]:
 
         symbol_id = f"{chart_data.ticker}_{chart_data.exchange}"
         
@@ -363,7 +259,7 @@ class BrainyChart:
         #
     #
 
-    def delete_shape(self, chart_data:ChartData, shape_code:int) -> Dict:
+    def delete_shape(self, chart_data:Symbol, shape_code:int) -> Dict:
         
         symbol_id = f"{chart_data.ticker}_{chart_data.exchange}"
 
@@ -374,7 +270,7 @@ class BrainyChart:
         return (response.json())
     #
 
-    def delete_all_shapes(self, chart_data:ChartData) -> Dict:
+    def delete_all_shapes(self, chart_data:Symbol) -> Dict:
 
         symbol_id = f"{chart_data.ticker}_{chart_data.exchange}"
         url       = f"{self.server_url}/shapes/{symbol_id}"
