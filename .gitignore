@@ -3,3 +3,4 @@ brainy_charts/backend/datafeed/
 tradingview.db
 charting_library-master.zip
 playground/MyExample.ipynb
+brainy_charts/frontend/chart_widget/index.html
