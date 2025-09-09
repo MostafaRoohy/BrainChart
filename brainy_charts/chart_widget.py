@@ -1,22 +1,4 @@
 #
-# https://www.tradingview.com/charting-library-docs/latest/core_concepts/Widget-Constructor/
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/
-# https://www.tradingview.com/charting-library-docs/latest/core_concepts/widget-methods
-# https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#default-resolution
-# https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets
-#
-#
-# https://www.tradingview.com/charting-library-docs/latest/saving_loading/
-# https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/
-# https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/chart-layout-methods
-# https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/indicator-template-methods
-# https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/drawing-methods
-# https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/drawing-template-methods
-# https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-adapter
-# https://www.tradingview.com/charting-library-docs/latest/saving_loading/low-level-api
-# https://www.tradingview.com/charting-library-docs/latest/saving_loading/saving_drawings_separately
-# https://www.tradingview.com/charting-library-docs/latest/saving_loading/user-settings
-#
 ###################################################################################################
 ###################################################################################################
 ################################################################################################### index.html builder

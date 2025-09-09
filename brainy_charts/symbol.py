@@ -1,16 +1,10 @@
 #
-# https://www.tradingview.com/charting-library-docs/latest/connecting_data/Symbology
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.LibrarySymbolInfo/
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.SymbolExt/
-#
 ###################################################################################################
 ###################################################################################################
-###################################################################################################
+################################################################################################### Modules
 #
 import pandas as pd
 from typing import List, Dict, Optional, Any, Literal
-
-Literal()
 #
 ###################################################################################################
 ###################################################################################################

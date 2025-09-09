@@ -1,24 +1,4 @@
 #
-# https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/
-# https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/Drawings-List
-# https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/drawings-api
-#
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createshape
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateShapeOptions/
-#
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#getshapebyid
-#
-#
-#
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createmultipointshape
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateMultipointShapeOptions/
-#
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createexecutionshape
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IExecutionLineAdapter/
-#
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createanchoredshape
-# https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/
-#
 ###################################################################################################
 ###################################################################################################
 ################################################################################################### Shape Constants
