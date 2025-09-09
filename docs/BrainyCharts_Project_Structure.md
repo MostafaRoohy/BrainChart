@@ -27,38 +27,38 @@
     brainy_charts/                     # The core package for the BrainyCharts application, containing all the logic for data handling, server management, and chart rendering.
     │
     ├── backend/
-    |   │
-    |   ├── database/
-    |   │   ├── migrations/
-    |   │   ├── alembic.ini
-    |   │   └── tradingview.db.ini
-    |   │
-    |   ├── datafeed/
-    |   |   ├── symbol_unique_name_1.csv
-    |   |   ├── symbol_unique_name_2.csv
-    |   |   ├── symbol_unique_name_3.csv
-    |   |   ├── .
-    |   |   ├── .
-    |   |   ├── .
-    |   |   └── registry.json
-    |   │
-    |   ├── __init__.py
-    |   │
-    |   ├── database.py                # Configures the connection to the SQLite database using SQLAlchemy and manages database sessions.
-    |   │
-    |   ├── main.py                    # The entry point for the FastAPI application. It initializes the app, configures middleware, and includes the API routes.
-    |   │
-    |   ├── models.py                  # Defines the database schema using SQLAlchemy ORM, including the `Chart` and `Shape` tables.
-    |   │
-    |   ├── routes.py                  # Contains all the API endpoints for the backend, handling requests for symbol information, historical data, and shape manipulation.
-    |   │
-    |   └── schemas.py                 # Defines the Pydantic models for API data validation, ensuring that request and response data structures are correct.
+    │   │
+    │   ├── database/
+    │   │   ├── migrations/
+    │   │   ├── alembic.ini
+    │   │   └── tradingview.db.ini
+    │   │
+    │   ├── datafeed/
+    │   │   ├── symbol_unique_name_1.csv
+    │   │   ├── symbol_unique_name_2.csv
+    │   │   ├── symbol_unique_name_3.csv
+    │   │   ├── .
+    │   │   ├── .
+    │   │   ├── .
+    │   │   └── registry.json
+    │   │
+    │   ├── __init__.py
+    │   │
+    │   ├── database.py                # Configures the connection to the SQLite database using SQLAlchemy and manages database sessions.
+    │   │
+    │   ├── main.py                    # The entry point for the FastAPI application. It initializes the app, configures middleware, and includes the API routes.
+    │   │
+    │   ├── models.py                  # Defines the database schema using SQLAlchemy ORM, including the `Chart` and `Shape` tables.
+    │   │
+    │   ├── routes.py                  # Contains all the API endpoints for the backend, handling requests for symbol information, historical data, and shape manipulation.
+    │   │
+    │   └── schemas.py                 # Defines the Pydantic models for API data validation, ensuring that request and response data structures are correct.
     │
     │
     ├── frontend/
-    |   │
-    |   └── chart_widget/
-    |       └── index.html             # The HTML file that renders the TradingView charting library widget in the browser.
+    │   │
+    │   └── chart_widget/
+    │       └── index.html             # The HTML file that renders the TradingView charting library widget in the browser.
     │
     │
     ├── __init__.py                    # Marks the `brainy_charts` directory as a Python package, allowing its modules to be imported.
@@ -87,31 +87,31 @@ All internal JS and CSS codes of the library are inlined and minified to reduce 
 
 ```bash
     charting_library/                              # contains all the library files.
-    |
+    │
     ├── charting_library/                          # files contain an external library widget interface, they are not supposed to be edited.
-    |   |
-    |   ├── bundles/                               # stores library internal content and is not intended for other purposes, it should be like "black box" for you so it could be changed anytime without a notice.
-    |   |
-    |   ├── charting_library.js                    # is an UMD module (for backward compatibility). is an UMD module (for backward compatibility).
-    |   |
-    |   ├── charting_library.d.ts                  # contains TypeScript definitions for the widget interface.
-    |   |
-    |   ├── charting_library.cjs.js                # is an CommonJS module. is an UMD module (for backward compatibility).
-    |   |
-    |   ├── charting_library.esm.js                # is an native JavaScript module, see import. is an UMD module (for backward compatibility).
-    |   |
-    |   ├── charting_library.standalone.js         # is an iife module. is an UMD module (for backward compatibility).
-    |   |
-    |   ├── datafeed-api.d.ts                      # contains TypeScript definitions for the data feed interface.
-    |   |
-    |   └── package.json
-    |
-    |
+    │   │
+    │   ├── bundles/                               # stores library internal content and is not intended for other purposes, it should be like "black box" for you so it could be changed anytime without a notice.
+    │   │
+    │   ├── charting_library.js                    # is an UMD module (for backward compatibility). is an UMD module (for backward compatibility).
+    │   │
+    │   ├── charting_library.d.ts                  # contains TypeScript definitions for the widget interface.
+    │   │
+    │   ├── charting_library.cjs.js                # is an CommonJS module. is an UMD module (for backward compatibility).
+    │   │
+    │   ├── charting_library.esm.js                # is an native JavaScript module, see import. is an UMD module (for backward compatibility).
+    │   │
+    │   ├── charting_library.standalone.js         # is an iife module. is an UMD module (for backward compatibility).
+    │   │
+    │   ├── datafeed-api.d.ts                      # contains TypeScript definitions for the data feed interface.
+    │   │
+    │   └── package.json
+    │
+    │
     ├── datafeeds/
-    |   |
-    |   └── udf/                                   # contains UDF-compatible datafeed wrapper (implements Datafeed API to connect to library and UDF to connect to datafeed). Sample datafeed wrapper implements pulse real-time emulation. You are free to edit its code.
-    |
-    |
+    │   │
+    │   └── udf/                                   # contains UDF-compatible datafeed wrapper (implements Datafeed API to connect to library and UDF to connect to datafeed). Sample datafeed wrapper implements pulse real-time emulation. You are free to edit its code.
+    │
+    │
     └── changelog.md/
 ```
 
