@@ -52,7 +52,7 @@ index_html_raw = r'''
                     // https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/#load_last_chart
                     // load_last_chart : true,
 
-                    <!-- https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets/ -->
+                    // https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets/
                     disabled_features : ["use_localstorage_for_settings"],
                     enabled_features  : ["study_templates"],
 
@@ -60,9 +60,6 @@ index_html_raw = r'''
                     charts_storage_api_version : "1.1",
 
                     // custom_indicators_getter: ???
-
-
-
                 }});
 
 
