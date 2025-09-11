@@ -15,10 +15,16 @@ TradingView's charts are the gold standard in financial visualization, but using
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 
+## 🎯 RoadMap
+
 My roadmap for developing this project is as follows.
 
+I have developed the very zero version that "works". It can plot your dataframe.
+
+Next, we will have two major versions:
+
 <details>
-<summary>Version 0 RoadMap</summary>
+<summary>1️⃣ Version 1 RoadMap</summary>
 
 1) **Chart Widget**
 
@@ -49,7 +55,7 @@ My roadmap for developing this project is as follows.
         + [Universal DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF)
         + [DataFeed Issues](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-Issues)
 
-4) **Shaping Functionalities**
+4) **Basic Shaping Functionalities**
 
     + Base
         + [Drawing](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/)
@@ -61,56 +67,8 @@ My roadmap for developing this project is as follows.
 
         + [getshapebyid()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#getshapebyid)
 
-</details>
 
-<details>
-<summary>Version 1 RoadMap</summary>
-
-1) **Chart Widget**
-
-    + Saving/Loading
-        + [Widget Saving/Loading](https://www.tradingview.com/charting-library-docs/latest/saving_loading/)
-        + [Save/Load REST API](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/)
-        + [Chart Layout Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/chart-layout-methods)
-        + [Indicator Template Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/indicator-template-methods)
-        + [Template](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/drawing-methods)
-        + [Template Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/drawing-template-methods)
-        + [Save/Load Adapter](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-adapter)
-        + [Low Level API](https://www.tradingview.com/charting-library-docs/latest/saving_loading/low-level-api)
-        + [Saving Drawings Separately](https://www.tradingview.com/charting-library-docs/latest/saving_loading/saving_drawings_separately)
-        + [User Settings](https://www.tradingview.com/charting-library-docs/latest/saving_loading/user-settings)
-
-4) **Datafeed Re-Architecture**
-
-    + DataFeed
-        + [DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/)
-        + [DataFeed API](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/)
-        + [DataFeed Required Methods](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods)
-        + [DataFeed Additional Methods](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/additional-methods)
-        + [Universal DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF)
-        + [DataFeed Issues](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-Issues)
-
-        + [Symbol DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Symbology)
-        + [Trading Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Trading-Sessions)
-        + [Extended Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions)
-
-5) **Shaping Functionalities**
-
-    + Advanced Shapes
-        + [createmultipointshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createmultipointshape)
-        + [CreateMultipointShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateMultipointShapeOptions/)
-
-        + [createexecutionshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createexecutionshape)
-        + [IExecutionLineAdapter](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IExecutionLineAdapter/)
-
-        + [createanchoredshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createanchoredshape)
-        + [CreateAnchoredShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/)
-
-6) **Project ReDesign & BackEnd/FrontEnd Overview**
-   
-   + COMPLETE ReView & ReWire
-
-7) **Custom Indicators & Timeseries**
+5) **Custom Indicators & Timeseries**
    
     + Foundamentals
         + [Built-In Indicators](https://www.tradingview.com/charting-library-docs/latest/ui_elements/indicators/)
@@ -131,7 +89,56 @@ My roadmap for developing this project is as follows.
         + [Examples](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-Examples)
         + [Extending The Time Scale](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Studies-Extending-The-Time-Scale)
 
-8) **Online Streaming (Far Future)**
+</details>
+
+<details>
+<summary>2️⃣ Version 2 RoadMap</summary>
+
+1) **Advanced Chart Widget**
+
+    + Saving/Loading
+        + [Widget Saving/Loading](https://www.tradingview.com/charting-library-docs/latest/saving_loading/)
+        + [Save/Load REST API](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/)
+        + [Chart Layout Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/chart-layout-methods)
+        + [Indicator Template Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/indicator-template-methods)
+        + [Template](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/drawing-methods)
+        + [Template Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/drawing-template-methods)
+        + [Save/Load Adapter](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-adapter)
+        + [Low Level API](https://www.tradingview.com/charting-library-docs/latest/saving_loading/low-level-api)
+        + [Saving Drawings Separately](https://www.tradingview.com/charting-library-docs/latest/saving_loading/saving_drawings_separately)
+        + [User Settings](https://www.tradingview.com/charting-library-docs/latest/saving_loading/user-settings)
+
+2) **Datafeed Re-Architecture**
+
+    + DataFeed
+        + [DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/)
+        + [DataFeed API](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/)
+        + [DataFeed Required Methods](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods)
+        + [DataFeed Additional Methods](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/additional-methods)
+        + [Universal DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF)
+        + [DataFeed Issues](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-Issues)
+
+        + [Symbol DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Symbology)
+        + [Trading Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Trading-Sessions)
+        + [Extended Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions)
+
+3) **Advanced Shaping Functionalities**
+
+    + Advanced Shapes
+        + [createmultipointshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createmultipointshape)
+        + [CreateMultipointShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateMultipointShapeOptions/)
+
+        + [createexecutionshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createexecutionshape)
+        + [IExecutionLineAdapter](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IExecutionLineAdapter/)
+
+        + [createanchoredshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createanchoredshape)
+        + [CreateAnchoredShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/)
+
+4) **Project ReDesign & BackEnd/FrontEnd Overview**
+   
+   + COMPLETE ReView & ReWire
+
+5) **Online DataFeed Streaming**
 
     + DataFeed
         + [DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/)
@@ -160,6 +167,8 @@ ping me!
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-blue)](https://linkedin.com/in/mostafaroohy)
 [![Telegram](https://img.shields.io/badge/Telegram-skyblue)](https://telegram.me/MostafaRoohy)
 [![Telegram Channel](https://img.shields.io/badge/BrainyAlgo-lightblue)](https://telegram.me/BrainyAlgo)  
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 ##
 Star ⭐ the repo if this saves you hours of work!
