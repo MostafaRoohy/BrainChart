@@ -15,10 +15,10 @@ TradingView's charts are the gold standard in financial visualization, but using
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-<details>
-<summary>RoadMap</summary>
-
 My roadmap for developing this project is as follows.
+
+<details>
+<summary>Version 0 RoadMap</summary>
 
 1) **Chart Widget**
 
@@ -28,18 +28,6 @@ My roadmap for developing this project is as follows.
         + [Widget Methods](https://www.tradingview.com/charting-library-docs/latest/core_concepts/widget-methods)
         + [Widget Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution/#default-resolution)
         + [Widget Features](https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets)
-
-    + Saving/Loading
-        + [Widget Saving/Loading](https://www.tradingview.com/charting-library-docs/latest/saving_loading/)
-        + [Save/Load REST API](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/)
-        + [Chart Layout Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/chart-layout-methods)
-        + [Indicator Template Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/indicator-template-methods)
-        + [Template](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/drawing-methods)
-        + [Template Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/drawing-template-methods)
-        + [Save/Load Adapter](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-adapter)
-        + [Low Level API](https://www.tradingview.com/charting-library-docs/latest/saving_loading/low-level-api)
-        + [Saving Drawings Separately](https://www.tradingview.com/charting-library-docs/latest/saving_loading/saving_drawings_separately)
-        + [User Settings](https://www.tradingview.com/charting-library-docs/latest/saving_loading/user-settings)
 
 2) **Symbol**
 
@@ -61,6 +49,37 @@ My roadmap for developing this project is as follows.
         + [Universal DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF)
         + [DataFeed Issues](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-Issues)
 
+4) **Shaping Functionalities**
+
+    + Base
+        + [Drawing](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/)
+        + [Drawings List](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/Drawings-List)
+        + [Drawings API](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/drawings-api)
+
+        + [createshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createshape)
+        + [CreateShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateShapeOptions/)
+
+        + [getshapebyid()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#getshapebyid)
+
+</details>
+
+<details>
+<summary>Version 1 RoadMap</summary>
+
+1) **Chart Widget**
+
+    + Saving/Loading
+        + [Widget Saving/Loading](https://www.tradingview.com/charting-library-docs/latest/saving_loading/)
+        + [Save/Load REST API](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/)
+        + [Chart Layout Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/chart-layout-methods)
+        + [Indicator Template Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/indicator-template-methods)
+        + [Template](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/drawing-methods)
+        + [Template Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/drawing-template-methods)
+        + [Save/Load Adapter](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-adapter)
+        + [Low Level API](https://www.tradingview.com/charting-library-docs/latest/saving_loading/low-level-api)
+        + [Saving Drawings Separately](https://www.tradingview.com/charting-library-docs/latest/saving_loading/saving_drawings_separately)
+        + [User Settings](https://www.tradingview.com/charting-library-docs/latest/saving_loading/user-settings)
+
 4) **Datafeed Re-Architecture**
 
     + DataFeed
@@ -76,17 +95,6 @@ My roadmap for developing this project is as follows.
         + [Extended Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions)
 
 5) **Shaping Functionalities**
-
-    + Base
-        + [Drawing](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/)
-        + [Drawings List](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/Drawings-List)
-        + [Drawings API](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/drawings-api)
-
-        + [createshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createshape)
-        + [CreateShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateShapeOptions/)
-
-        + [getshapebyid()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#getshapebyid)
-
 
     + Advanced Shapes
         + [createmultipointshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createmultipointshape)
