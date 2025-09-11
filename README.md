@@ -26,7 +26,7 @@ Next, we will have two major versions:
 <details>
 <summary>1️⃣ Version 1 RoadMap</summary>
 
-1) **Chart Widget**
+1) **Chart Widget [x]**
 
     + The Main Chart Widget
         + [Widget Constructor](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Widget-Constructor/)
@@ -55,7 +55,7 @@ Next, we will have two major versions:
         + [Universal DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF)
         + [DataFeed Issues](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-Issues)
 
-4) **Basic Shaping Functionalities**
+4) **Shaping Functionalities**
 
     + Base
         + [Drawing](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/)
@@ -66,6 +66,16 @@ Next, we will have two major versions:
         + [CreateShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateShapeOptions/)
 
         + [getshapebyid()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#getshapebyid)
+    
+    + Advanced
+        + [createmultipointshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createmultipointshape)
+        + [CreateMultipointShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateMultipointShapeOptions/)
+
+        + [createexecutionshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createexecutionshape)
+        + [IExecutionLineAdapter](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IExecutionLineAdapter/)
+
+        + [createanchoredshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createanchoredshape)
+        + [CreateAnchoredShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/)
 
 
 5) **Custom Indicators & Timeseries**
@@ -122,23 +132,11 @@ Next, we will have two major versions:
         + [Trading Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Trading-Sessions)
         + [Extended Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions)
 
-3) **Advanced Shaping Functionalities**
-
-    + Advanced Shapes
-        + [createmultipointshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createmultipointshape)
-        + [CreateMultipointShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateMultipointShapeOptions/)
-
-        + [createexecutionshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createexecutionshape)
-        + [IExecutionLineAdapter](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IExecutionLineAdapter/)
-
-        + [createanchoredshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createanchoredshape)
-        + [CreateAnchoredShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/)
-
-4) **Project ReDesign & BackEnd/FrontEnd Overview**
+3) **Project ReDesign & BackEnd/FrontEnd Overview**
    
    + COMPLETE ReView & ReWire
 
-5) **Online DataFeed Streaming**
+4) **Online DataFeed Streaming**
 
     + DataFeed
         + [DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/)
