@@ -26,9 +26,9 @@ Next, we will have two major versions:
 <details>
 <summary>1️⃣ Version 1 RoadMap</summary>
 
-1) **⬜️ Chart Widget**
+1) **▶️ Chart Widget**
 
-    + ⚪️ The Main Chart Widget
+    + 🔄 The Main Chart Widget
         + [Widget Constructor](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Widget-Constructor/)
         + [Widget Options](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/)
         + [Widget Methods](https://www.tradingview.com/charting-library-docs/latest/core_concepts/widget-methods)
