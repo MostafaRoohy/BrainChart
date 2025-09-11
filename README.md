@@ -26,25 +26,25 @@ Next, we will have two major versions:
 <details>
 <summary>1️⃣ Version 1 RoadMap</summary>
 
-1) **Chart Widget [x]**
+1) **⬜️ Chart Widget**
 
-    + The Main Chart Widget
+    + ⚪️ The Main Chart Widget
         + [Widget Constructor](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Widget-Constructor/)
         + [Widget Options](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/)
         + [Widget Methods](https://www.tradingview.com/charting-library-docs/latest/core_concepts/widget-methods)
         + [Widget Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution/#default-resolution)
         + [Widget Features](https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets)
 
-2) **Symbol**
+2) **⬜️ Symbol**
 
-    + Symbol Modeling
+    + ⚪️ Symbol Modeling
         + [Symbol DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Symbology)
         + [Symbol Model](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.LibrarySymbolInfo/)
         + [SymbolExt](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.SymbolExt/)
 
-3) **Offline Static TOHLCV Data for Symbol**
+3) **⬜️ Offline Static TOHLCV Data for Symbol**
 
-    + Symbol DataFeed
+    + ⚪️ Symbol DataFeed
         + [Symbol DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Symbology)
         + [Symbol Model](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.LibrarySymbolInfo/)
 
@@ -55,9 +55,9 @@ Next, we will have two major versions:
         + [Universal DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF)
         + [DataFeed Issues](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-Issues)
 
-4) **Shaping Functionalities**
+4) **⬜️ Shaping Functionalities**
 
-    + Base
+    + ⚪️ Base
         + [Drawing](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/)
         + [Drawings List](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/Drawings-List)
         + [Drawings API](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/drawings-api)
@@ -67,7 +67,7 @@ Next, we will have two major versions:
 
         + [getshapebyid()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#getshapebyid)
     
-    + Advanced
+    + ⚪️ Advanced
         + [createmultipointshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createmultipointshape)
         + [CreateMultipointShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateMultipointShapeOptions/)
 
@@ -78,24 +78,24 @@ Next, we will have two major versions:
         + [CreateAnchoredShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/)
 
 
-5) **Custom Indicators & Timeseries**
+5) **⬜️ Custom Indicators & Timeseries**
    
-    + Foundamentals
+    + ⚪️ Foundamentals
         + [Built-In Indicators](https://www.tradingview.com/charting-library-docs/latest/ui_elements/indicators/)
         + [Custom Study](https://www.tradingview.com/charting-library-docs/latest/custom_studies/)
     
-    + MetaInfo
+    + ⚪️ MetaInfo
         + [MetaInfo](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/)
         + [Custom Study Inputs](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/Custom-Studies-Inputs)
         + [Custom Study Defaults](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/Custom-Studies-Defaults)
     
-    + Custom Indicator
+    + ⚪️ Custom Indicator
         + [Custom Indicator Constructor](https://www.tradingview.com/charting-library-docs/latest/custom_studies/custom-indicator-constructor)
         + [PineJS](https://www.tradingview.com/charting-library-docs/latest/custom_studies/PineJS-Utility-Functions)
         + [Custom Study Plots](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-Plots)
         + [Custom Study OHLC Plots](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-OHLC-Plots)
     
-    + Other
+    + ⚪️ Other
         + [Examples](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-Examples)
         + [Extending The Time Scale](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Studies-Extending-The-Time-Scale)
 
@@ -104,9 +104,9 @@ Next, we will have two major versions:
 <details>
 <summary>2️⃣ Version 2 RoadMap</summary>
 
-1) **Advanced Chart Widget**
+1) **⬜️ Advanced Chart Widget**
 
-    + Saving/Loading
+    + ⚪️ Saving/Loading
         + [Widget Saving/Loading](https://www.tradingview.com/charting-library-docs/latest/saving_loading/)
         + [Save/Load REST API](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/)
         + [Chart Layout Methods](https://www.tradingview.com/charting-library-docs/latest/saving_loading/save-load-rest-api/chart-layout-methods)
@@ -118,9 +118,9 @@ Next, we will have two major versions:
         + [Saving Drawings Separately](https://www.tradingview.com/charting-library-docs/latest/saving_loading/saving_drawings_separately)
         + [User Settings](https://www.tradingview.com/charting-library-docs/latest/saving_loading/user-settings)
 
-2) **Datafeed Re-Architecture**
+2) **⬜️ Datafeed Re-Architecture**
 
-    + DataFeed
+    + ⚪️ DataFeed
         + [DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/)
         + [DataFeed API](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/)
         + [DataFeed Required Methods](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods)
@@ -132,13 +132,13 @@ Next, we will have two major versions:
         + [Trading Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Trading-Sessions)
         + [Extended Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions)
 
-3) **Project ReDesign & BackEnd/FrontEnd Overview**
+3) **⬜️ Project ReDesign & BackEnd/FrontEnd Overview**
    
-   + COMPLETE ReView & ReWire
+   + ⚪️ COMPLETE ReView & ReWire
 
-4) **Online DataFeed Streaming**
+4) **⬜️ Online DataFeed Streaming**
 
-    + DataFeed
+    + ⚪️ DataFeed
         + [DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/)
         + [DataFeed API](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/)
         + [DataFeed Required Methods](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods)
