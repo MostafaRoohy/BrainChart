@@ -24,7 +24,7 @@ import json
 ################################################################################################### Modules
 #
 from .symbol       import Symbol
-from .chart_widget import index_html_raw
+from .chart_widget import ChartWidget
 from .shape        import multi_point_shapes, one_point_shapes
 #
 ###################################################################################################
@@ -33,11 +33,20 @@ from .shape        import multi_point_shapes, one_point_shapes
 #
 class BrainyChart:
 
-    def __init__(self, chart_data_list:List[Symbol], default_chart:Symbol=None, theme:str=['dark', 'light'], server_port=8000, verbose:bool=False, jupyter:bool=False):
+    def __init__(self, chart_data_list:List[Symbol]=None, chart_widget:ChartWidget=None, server_port=8000, verbose:bool=False, jupyter:bool=False):
         
         if (chart_data_list is None):
 
             raise
+        #
+
+        if (chart_widget is None):
+
+            ChartWidget(symbol=chart_data_list[0].name)._generate_index_html()
+        #
+        else:
+
+            chart_widget._generate_index_html()
         #
 
 
@@ -56,13 +65,6 @@ class BrainyChart:
         with open(datafeed_dir/"registry.json", "w") as f:
 
             json.dump(registry, f, indent=2)
-        #
-        with open(package_dir/"frontend"/"chart_widget"/"index.html", "w") as file:
-
-            theme          = (theme)              if (theme is not None)         else ("dark")
-            default_symbol = (default_chart.name) if (default_chart is not None) else (chart_data_list[0].name)
-
-            file.write(index_html_raw.format(theme=theme, default_symbol=default_symbol))
         #
 
 

@@ -29,8 +29,8 @@ Next, we will have two major versions:
 1) **▶️ Chart Widget**
 
     + 🔄 The Main Chart Widget
-        + [Widget Constructor](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Widget-Constructor/)
-        + [Widget Options](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/)
+        + ✔️ [Widget Constructor](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Widget-Constructor/)
+        + ✔️ [Widget Options](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/)
         + [Widget Methods](https://www.tradingview.com/charting-library-docs/latest/core_concepts/widget-methods)
         + [Widget Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution/#default-resolution)
         + [Widget Features](https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets)
