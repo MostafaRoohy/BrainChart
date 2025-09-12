@@ -1483,7 +1483,7 @@ class ChartWidget:
         self.datafeed                 = ("") if (datafeed                 is None) else (f"datafeed                 : {datafeed},")
         self.container                = ("") if (container                is None) else (f"container                : '{container}',")
         self.theme                    = ("") if (theme                    is None) else (f"theme                    : '{theme}',")
-        self.symbol                   = ("") if (symbol                   is None) else (f"symbol                   : '{symbol.name}',")
+        self.symbol                   = ("") if (symbol                   is None) else (f"symbol                   : '{symbol.ticker}',")
         self.interval                 = ("") if (interval                 is None) else (f"interval                 : '{interval}',")
 
         self.timezone                 = ("") if (timezone                 is None) else (f"timezone                 : '{timezone}',")

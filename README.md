@@ -36,30 +36,30 @@ Next, we will have two major versions:
         + ✔️ [Widget Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution/#default-resolution)
         + ✔️ [Widget Features](https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets)
 
-2) **▶️ Symbol**
+2) **✅ Symbol**
 
-    + 🔄 Symbol Modeling
-        + [Symbol Model](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.LibrarySymbolInfo/)
+    + ☑️ Symbol Modeling
+        + ✔️ [Symbol Model](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.LibrarySymbolInfo/)
         
-        + [Symbol DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Symbology)
-        + [SymbolExt](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.SymbolExt/)
+        + ✔️ [Symbol DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Symbology)
+        + ✔️ [SymbolExt](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.SymbolExt/)
 
-3) **⬜️ Offline Static TOHLCV Data for Symbol**
+3) **✅ Offline Static TOHLCV Data for Symbol**
 
-    + ⚪️ Symbol DataFeed
-        + [Symbol DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Symbology)
-        + [Symbol Model](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.LibrarySymbolInfo/)
+    + ☑️ Symbol DataFeed
+        + ✔️ [Symbol DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Symbology)
+        + ✔️ [Symbol Model](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.LibrarySymbolInfo/)
 
-        + [DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/)
-        + [DataFeed API](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/)
-        + [DataFeed Required Methods](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods)
-        + [DataFeed Additional Methods](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/additional-methods)
-        + [Universal DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF)
-        + [DataFeed Issues](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-Issues)
+        + ✔️ [DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/)
+        + ✔️ [DataFeed API](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/)
+        + ✔️ [DataFeed Required Methods](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods)
+        + ✔️ [DataFeed Additional Methods](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/additional-methods)
+        + ✔️ [Universal DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF)
+        + ✔️ [DataFeed Issues](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-Issues)
 
-4) **⬜️ Shaping Functionalities**
+4) **▶️ Shaping Functionalities**
 
-    + ⚪️ Base
+    + 🔄 Base
         + [Drawing](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/)
         + [Drawings List](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/Drawings-List)
         + [Drawings API](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/drawings-api)
