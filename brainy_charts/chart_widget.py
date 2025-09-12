@@ -1391,8 +1391,8 @@ class ChartWidget:
                  ################################################################################################## Good
                  #
                  favorites                                : Optional[Favorites]                            = None,
-                 disabled_features                        : Optional[list[ChartingLibraryFeatureset]]      = ["use_localstorage_for_settings"],
-                 enabled_features                         : Optional[list[ChartingLibraryFeatureset]]      = None,
+                 disabled_features                        : Optional[list[ChartingLibraryFeatureset]]      = ["use_localstorage_for_settings", ],
+                 enabled_features                         : Optional[list[ChartingLibraryFeatureset]]      = ["seconds_resolution", "tick_resolution", ],
                  #
                  ################################################################################################## Custom Indicator and Study
                  #
