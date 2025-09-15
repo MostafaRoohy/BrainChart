@@ -7,19 +7,20 @@
 ###################################################################################################
 #
 import time
-import json
-import pandas as pd
-import numpy as np
 from pathlib import Path
+
+import pandas as pd
+import numpy  as np
+import json
+import hashlib
+
 from fastapi import APIRouter, HTTPException, Query, Depends
 from fastapi.responses import JSONResponse
+
 from typing import Optional
 from sqlalchemy.orm import Session
-#
-###################################################################################################
-###################################################################################################
-###################################################################################################
-#
+
+
 from .database import get_db, SessionLocal
 from .models import Chart, Shape
 from .schemas import ShapeCreate, ShapeResponse, ShapeAPIResponse
@@ -28,7 +29,7 @@ from pathlib import Path
 #
 ###################################################################################################
 ###################################################################################################
-###################################################################################################
+################################################################################################### Helpers
 #
 router       = APIRouter()
 DATAFEED_DIR = Path(__file__).parent / "datafeed"
@@ -74,14 +75,20 @@ def load_ticker_history_csv(ticker:str) -> pd.DataFrame:
 #
 ###################################################################################################
 ###################################################################################################
-###################################################################################################
+################################################################################################### Chart
 #
 @router.get("/config")
 async def get_config():
 
     registry        = load_registry()
     all_resolutions = set()
-    for meta in registry.values():
+
+    for key, meta in registry.items():
+
+        if (not isinstance(meta, dict)):
+
+            continue
+        #
 
         all_resolutions.update(meta.get("supported_resolutions", ['1', '5', '15', '30', '60', '1D', '1W', '1M']))
     #
@@ -104,7 +111,7 @@ async def get_server_time(symbol:Optional[str]=None):
         try:
 
             df = load_ticker_history_csv(symbol)
-            return int(df['timestamp'].max() // 1000)
+            return int(df['timestamp'].max() / 1000)
         #
         except Exception as e:
 
@@ -119,9 +126,14 @@ async def get_server_time(symbol:Optional[str]=None):
         registry = load_registry()
         latest   = 0
 
-        for ticker in registry:
+        for key, meta in registry.items():
 
-            df = load_ticker_history_csv(ticker)
+            if (not isinstance(meta, dict)):
+
+                continue
+            #
+
+            df = load_ticker_history_csv(key)
             ts = df['timestamp'].max()
 
             if (ts > latest):
@@ -130,7 +142,7 @@ async def get_server_time(symbol:Optional[str]=None):
             #
         #
 
-        return (int(latest // 1000))
+        return (int(latest / 1000))
     #
     except Exception as e:
 
@@ -144,9 +156,14 @@ async def search_symbols(query:str="", type:Optional[str]=None, exchange:Optiona
     registry = load_registry()
     matches  = []
 
-    for symbol_id, meta in registry.items():
+    for key, meta in registry.items():
 
-        if (query.lower() in symbol_id.lower()):
+        if (not isinstance(meta, dict)):
+
+            continue
+        #
+
+        if (query.lower() in key.lower()):
 
             if (exchange and meta.get("exchange").lower() != exchange.lower()):
                 
@@ -159,7 +176,7 @@ async def search_symbols(query:str="", type:Optional[str]=None, exchange:Optiona
             #
 
             matches.append({
-                "symbol"      : symbol_id,
+                "symbol"      : key,
                 "name"        : meta.get("name"),
                 "ticker"      : meta.get("ticker"),
                 "full_name"   : meta.get("full_name"),
@@ -177,9 +194,10 @@ async def search_symbols(query:str="", type:Optional[str]=None, exchange:Optiona
 
     return (matches)
 #
-
-
-
+###################################################################################################
+###################################################################################################
+################################################################################################### Symbol
+#
 @router.get("/symbols")
 async def get_symbols(symbol:str):
 
@@ -210,6 +228,7 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
         df          = load_ticker_history_csv(symbol)
         filtered_df = None
 
+
         if (from_time > 0  or  to_time > 0):
 
             if (resolution == '1D'):
@@ -225,37 +244,32 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
                 df['timestamp'] = df['timestamp'].astype(np.int64) // 10**6
             #
 
+
             if (countback is not None):
 
-                filtered_df = df.tail(countback)
+                mask        = (df['timestamp'] < to_time*1000)
+                filtered_df = df[mask].sort_values(by=['timestamp']).tail(countback).reset_index(drop=True)
             #
-            # if (from_time > 0  and  to_time > 0):
+            else:
 
-            mask        = (df['timestamp'] >= from_time*1000) & (df['timestamp'] < to_time*1000)
-            filtered_df = df[mask]
-            filtered_df = filtered_df.dropna()
-            filtered_df = filtered_df.sort_values(by='timestamp')
-            filtered_df = filtered_df.drop_duplicates(subset='timestamp')
+                mask        = (df['timestamp'] >= from_time*1000) & (df['timestamp'] < to_time*1000)
+                filtered_df = df[mask].sort_values(by=['timestamp']).reset_index(drop=True)
             #
+
 
             if (filtered_df.empty  or  len(filtered_df) == 0):
 
                 return JSONResponse(content={"s":"no_data", "nextTime":from_time})
-                # return JSONResponse(content={"s":"no_data", "nextTime":from_time, "min":str(df['timestamp'].min()), "max":str(df['timestamp'].max()), "from_time*1000":str(from_time*1000), "to_time*1000":str(to_time*1000)})
             #
-
-            data              = filtered_df.to_dict(orient='list')
-            data['timestamp'] = [ts // 1000 for ts in data['timestamp']]
-            data['volume']    = [0 if pd.isna(v) else v for v in data['volume']]
 
             return JSONResponse(content={
                 "s": "ok",
-                "t": (filtered_df['timestamp']).astype(int).tolist(),
-                "o": data['open'],
-                "h": data['high'],
-                "l": data['low'],
-                "c": data['close'],
-                "v": data['volume']
+                "t": (filtered_df['timestamp']/1000).astype(int).tolist(),
+                "o": filtered_df['open'].tolist(),
+                "h": filtered_df['high'].tolist(),
+                "l": filtered_df['low'].tolist(),
+                "c": filtered_df['close'].tolist(),
+                "v": filtered_df['volume'].tolist(),
             })
         #
         else:
@@ -267,6 +281,122 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
 
         return JSONResponse(content={"s": "error", "errmsg": str(e)})
     #
+#
+###################################################################################################
+###################################################################################################
+################################################################################################### Shapes
+#
+def _canon(obj):
+
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+#
+
+@router.post("/shapes", response_model=ShapeResponse)
+def create_shape(payload: ShapeCreate, db: Session = Depends(get_db)):
+
+    pts = []
+
+    for p in payload.points:
+
+        q = dict(p)
+
+        if ("time" in q):
+
+            q["time"] = int(q["time"])
+        #
+        if ("id" in q):
+
+            q["id"] = int(q["id"])
+        #
+        if ("price" in q):
+
+            q["price"] = float(q["price"])
+        #
+
+        pts.append(q)
+    #
+
+    sig_src = f"{payload.symbol}|{payload.shape_type}|{_canon(pts)}|{_canon(payload.options or {})}"
+    sig     = hashlib.sha1(sig_src.encode("utf-8")).hexdigest()
+
+    shape = Shape(
+        symbol     = payload.symbol,
+        shape_type = payload.shape_type,
+        points     = pts,
+        options    = payload.options or {},
+        sig        = sig,
+    )
+    db.add(shape)
+    db.commit()
+    db.refresh(shape)
+    return {
+        "id": shape.id,
+        "symbol": shape.symbol,
+        "shape_type": shape.shape_type,
+        "points": shape.points,
+        "options": shape.options,
+        "created_at": shape.created_at,
+    }
+
+    shape = Shape(
+        symbol     = payload.symbol,
+        shape_type = payload.shape_type,
+        points     = pts,
+        options    = payload.options or {},
+        sig        = sig,
+    )
+
+    db.add(shape)
+    db.commit()
+    db.refresh(shape)
+
+    return {
+        "id": shape.id,
+        "symbol": shape.symbol,
+        "shape_type": shape.shape_type,
+        "points": shape.points,
+        "options": shape.options,
+        "created_at": shape.created_at,
+    }
+#
+
+
+@router.get("/shapes", response_model=ShapeAPIResponse)
+def list_shapes(symbol: str | None = None, db: Session = Depends(get_db)):
+
+    q = db.query(Shape)
+
+    if symbol:
+
+        q = q.filter(Shape.symbol == symbol)
+    #
+
+    items = [{
+        "id": s.id,
+        "symbol": s.symbol,
+        "shape_type": s.shape_type,
+        "points": s.points,
+        "options": s.options,
+        "created_at": s.created_at,
+    } for s in q.order_by(Shape.created_at.asc()).all()]
+
+    return {"items": items}
+#
+
+@router.delete("/shapes/{shape_id}")
+def delete_shape(shape_id: int, db: Session = Depends(get_db)):
+
+    s = db.get(Shape, shape_id)
+
+    if (not s):
+
+        raise HTTPException(404, "shape not found")
+    #
+
+    db.delete(s)
+    db.commit()
+
+    return {"ok": True}
 #
 ###################################################################################################
 ###################################################################################################

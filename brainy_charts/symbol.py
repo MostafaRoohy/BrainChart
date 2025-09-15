@@ -703,7 +703,7 @@ class Symbol:
         `Default=["1"]`
     """
 
-    _tickers_count = 0
+    _tickers = []
 
     def __init__(self,
             #
@@ -712,8 +712,8 @@ class Symbol:
             ################################################################################################## Urgent
             #
             tohlcv_df                : pd.DataFrame                      = pd.DataFrame(),
-            ticker                   : Optional[str]                     = "SYMBOL_TICKER",
-            name                     : str                               = "symbol_name",
+            ticker                   : str                               = "TICKER",
+            name                     : str                               = "Name",
             base_name                : Optional[List[str]]               = None,
             library_custom_fields    : Optional[Dict[str, Any]]          = None,
             #
@@ -725,7 +725,7 @@ class Symbol:
             exchange                 : str                               = "ExChange",
             listed_exchange          : str                               = "ExChange",
             sector                   : Optional[str]                     = None,
-            industry                 : Optional[str]                     = None,
+            industry                 : Optional[list[str]]               = None,
             logo_urls                : Optional[str|List[str]]           = None,
             exchange_logo            : Optional[str]                     = None,
             #
@@ -748,6 +748,7 @@ class Symbol:
             has_ticks                : Optional[bool]                    = False,
             has_weekly_and_monthly   : Optional[bool]                    = False,
             has_empty_bars           : Optional[bool]                    = False,
+            build_seconds_from_ticks : Optional[bool]                    = False,
             supported_resolutions    : Optional[list[ResolutionString]]  = ["1S", "5S", "1", "5", "15", "30", "60", "D", "W"],
             intraday_multipliers     : Optional[List[str]]               = None,
             seconds_multipliers      : Optional[List[str]]               = ["1", "2", "3", "4", "5", "10", "15", "20", "30", "40"],
@@ -778,7 +779,7 @@ class Symbol:
             #
             ################################################################################################## Futures/Options
             #
-            expired                  : bool                              = False,
+            expired                  : Optional[bool]                    = False,
             expiration_date          : Optional[int]                     = None,
             #
             ################################################################################################## Units & Currency
@@ -799,8 +800,14 @@ class Symbol:
             #
         ):
 
+        if (ticker in Symbol._tickers):
+
+            raise
+        #
+
+
         self.tohlcv_df              = tohlcv_df
-        self.ticker                 = f"{ticker}_{Symbol._tickers_count}"
+        self.ticker                 = (ticker)  if  (ticker!="TICKER")  else  (f"TICKER_{len(Symbol._tickers)}")
         self.name                   = name
         self.base_name              = base_name
         self.library_custom_fields  = library_custom_fields
@@ -830,6 +837,7 @@ class Symbol:
         self.has_ticks              = has_ticks
         self.has_weekly_and_monthly = has_weekly_and_monthly
         self.has_empty_bars         = has_empty_bars
+        self.has_empty_bars         = build_seconds_from_ticks
         self.supported_resolutions  = supported_resolutions
         self.intraday_multipliers   = intraday_multipliers
         self.seconds_multipliers    = seconds_multipliers
@@ -837,7 +845,11 @@ class Symbol:
         self.weekly_multipliers     = weekly_multipliers
         self.monthly_multipliers    = monthly_multipliers
 
-        Symbol._tickers_count      += 1
+
+        self.session  = session
+        self.timezone = str(timezone)
+
+        Symbol._tickers.append(self.ticker)
     #
 
     def _as_dict(self):

@@ -1,6 +1,4 @@
 
-<!-- https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/#additional_symbol_info_fields -->
-
 <!DOCTYPE HTML>
 <html>
 
@@ -13,56 +11,245 @@
         <script type="text/javascript" src="/charting_library/datafeeds/udf/dist/bundle.js"></script>
 
         <script type="text/javascript">
-
+            //
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
             function getParameterByName(name) 
             {
                 name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
                 var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
                     results = regex.exec(location.search);
-                return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+                return results === null ? ""        : decodeURIComponent(results[1].replace(/\+/g, " "));
             }
-
-            function initOnReady()   
+            //
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            function initOnReady() 
             {
                 var datafeedUrl   = window.location.origin;
                 var customDataUrl = getParameterByName('dataUrl');
-
                 if (customDataUrl !== "") 
                 {
-                    datafeedUrl = customDataUrl.startsWith('https://') ? customDataUrl : `https://${customDataUrl}`;
+                    datafeedUrl = customDataUrl.startsWith('https://') ? customDataUrl        : `https://${customDataUrl}`;
                 }
-
-
+                //
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
                 var widget = window.tvWidget = new TradingView.widget(
                 {
-                    library_path : "/charting_library/charting_library/",
-                    container    : "tv_chart_container",
-                    datafeed     : new Datafeeds.UDFCompatibleDatafeed(datafeedUrl, undefined, {maxResponseLength: 1000, expectedOrder: 'latestFirst'}),
+                    debug                    : false,
+                    library_path             : '/charting_library/charting_library/',
+                    datafeed                 : new Datafeeds.UDFCompatibleDatafeed(datafeedUrl, undefined, {maxResponseLength: 1000, expectedOrder: 'latestFirst'}),
+                    container                : 'tv_chart_container',
+                    theme                    : 'dark',
+                    symbol                   : 'CGSS',
+                    interval                 : '1',
+
+                    timezone                 : 'Etc/UTC',
+                    locale                   : 'en',
+                    autosize                 : true,
+                    fullscreen               : true,
                     
-                    fullscreen : true,
-                    theme      : 'dark',
+                    
 
-                    symbol          : 'CryBB_DEx',
-                    interval        : '1',
-                    // https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.ChartingLibraryWidgetOptions/#load_last_chart
-                    // load_last_chart : true,
+                    favorites                : {drawingTools: ['LineToolRiskRewardLong', 'LineToolRiskRewardShort', 'LineToolRay', 'LineToolHorzLine', 'LineToolVer', 'LineToolRectangle', 'LineToolDateAndPriceRange']},
+                    disabled_features        : ['use_localstorage_for_settings', 'uppercase_instrument_names'],
+                    enabled_features         : ['seconds_resolution', 'tick_resolution'],
 
-                    // https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets/
-                    disabled_features : ["use_localstorage_for_settings"],
-                    enabled_features  : ["study_templates"],
-
-                    charts_storage_url         : 'https://saveload.tradingview.com',
-                    charts_storage_api_version : "1.1",
-
-                    // custom_indicators_getter: ???
+                    
                 });
+                //
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                widget.onChartReady(function () {
+                    const chart   = widget.activeChart();
+
+                    // state
+                    const renderedById        = new Map();  // server shape id -> entityId (number)
+                    const serverIdByEntityId  = new Map();  // entityId (number) -> server shape id
+                    const pendingCreates      = [];         // queue of server IDs that we're about to create
+                    const suppressDbDelete    = new Set();  // entityIds we're removing programmatically (don't DELETE)
+                    const renderedSigs        = new Set();  // content signatures to prevent duplicates
 
 
+                    const POLL_MS = 1500;
+                    let pollTimer = null;
+
+
+
+                    // Map TradingView drawing events <-> DB sync
+                    widget.subscribe('drawing_event', (entityId, type) => 
+                        {
+                            // 'create' | 'remove' | 'move' | 'hide' | 'show' | 'properties_changed' | 'points_changed'
+                            if (type === 'create') {
+                                // We created something (programmatically), match it to our queued DB id
+                                const serverId = pendingCreates.shift();
+                                if (serverId != null) {
+                                renderedById.set(serverId, entityId);
+                                serverIdByEntityId.set(entityId, serverId);
+                                }
+                            } else if (type === 'remove') {
+                                // If we initiated the removal ourselves, don't delete from DB
+                                if (suppressDbDelete.has(entityId)) {
+                                suppressDbDelete.delete(entityId);
+                                const sid = serverIdByEntityId.get(entityId);
+                                if (sid != null) {
+                                    serverIdByEntityId.delete(entityId);
+                                    renderedById.delete(sid);
+                                }
+                                return;
+                                }
+
+                                // User removed it in the UI -> DELETE from DB
+                                const sid = serverIdByEntityId.get(entityId);
+                                if (sid != null) {
+                                fetch(`/shapes/${sid}`, { method: 'DELETE' })
+                                    .catch(console.error)
+                                    .finally(() => {
+                                    serverIdByEntityId.delete(entityId);
+                                    renderedById.delete(sid);
+                                    });
+                                }
+                            }
+                        }
+                    );
+
+
+
+
+
+
+
+                    // helpers
+                    function toPoints(points) {
+                        return (points || []).map(p => {
+                        const q = {};
+                        if ('time'  in p) q.time  = Number(p.time);
+                        if ('id'    in p) q.id    = Number(p.id);
+                        if ('price' in p) q.price = Number(p.price);
+                        if ('channel' in p) q.channel = String(p.channel);
+                        return q;
+                        });
+                    }
+
+                    function makeSig(rec) {
+                        const pts  = toPoints(rec.points);
+                        const opts = rec.options || {};
+
+                        const uniq = (rec.id != null) ? `#${rec.id}` : `#${Math.random().toString(36).slice(2)}`;
+                        return `${rec.symbol}|${rec.shape_type}|${JSON.stringify(pts)}|${JSON.stringify(opts)}${uniq}`;
+                    }
+
+                    function clearRendered() {
+                        for (const id of renderedById.values()) {
+                        try { chart.removeEntity(id); } catch (_) {}
+                        }
+                        renderedById.clear();
+                        renderedSigs.clear();
+                    }
+
+                    async function fetchShapes(sym) {
+                        try {
+                        const r = await fetch(`/shapes?symbol=${encodeURIComponent(sym)}`, { cache: 'no-store' });
+                        if (!r.ok) return [];
+                        const j = await r.json();
+                        return j.items || [];
+                        } catch (_) { return []; }
+                    }
+
+                    async function draw(rec) {
+                    const sig = makeSig(rec);
+                    if (renderedSigs.has(sig)) return;
+                    if (rec.id && renderedById.has(rec.id)) return;
+
+                    const pts  = toPoints(rec.points);
+                    const opts = Object.assign({ shape: rec.shape_type }, rec.options || {});
+
+                    const entityId = (pts.length === 1)
+                        ? chart.createShape(pts[0], opts)
+                        : chart.createMultipointShape(pts, opts);
+
+                    if (rec.id != null && entityId != null) {
+                        renderedById.set(rec.id, entityId);
+                        serverIdByEntityId.set(entityId, rec.id);
+                    }
+                    renderedSigs.add(sig);
+                    }
+                    
+                    async function incrementalRefresh() {
+                        const sym   = chart.symbol();
+                        const items = await fetchShapes(sym);
+                        const incomingIds = new Set(items.map(r => r.id).filter(x => x != null));
+
+                        // add new
+                        for (const rec of items) await draw(rec);
+
+                        // remove missing (if any were deleted server-side)
+                        for (const [sid, entityId] of renderedById.entries()) {
+                        if (!incomingIds.has(sid)) {
+                            // We're removing because the server says it's gone — don't DELETE again
+                            suppressDbDelete.add(entityId);
+                            try { chart.removeEntity(entityId); } catch (_) {}
+                            renderedById.delete(sid);
+                            serverIdByEntityId.delete(entityId);
+                            // keep renderedSigs so reappearing identical content doesn't flicker
+                        }
+                        }
+                    }
+
+                    async function fullRefresh() {
+                        clearRendered();
+                        await incrementalRefresh();
+                    }
+
+                    function startPolling() { stopPolling(); pollTimer = setInterval(incrementalRefresh, POLL_MS); }
+                    function stopPolling()  { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+
+                    // ── boot: try once now, and again after first data load (single-shot)
+                    incrementalRefresh();
+                    chart.onDataLoaded().subscribe(null, function () {
+                        incrementalRefresh();
+                    }, true);
+
+                    startPolling();
+
+                    // ── symbol switch: hard reset, redraw once data is ready
+                    chart.onSymbolChanged().subscribe(null, function () {
+                        stopPolling();
+                        clearRendered();
+
+                        // draw immediately (in case data is cached already)
+                        incrementalRefresh();
+
+                        // then single-shot after bars finish loading (avoids stacking handlers)
+                        chart.onDataLoaded().subscribe(null, function () {
+                        fullRefresh();
+                        }, true);
+
+                        startPolling();
+                    });
+                });
+                //
+                //
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
                 window.frames[0].focus();
             };
-
+            //
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
             window.addEventListener('DOMContentLoaded', initOnReady, false);
-
+            //
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
         </script>
 
     </head>
@@ -70,7 +257,7 @@
     <body style="margin:0px;">
 
         <div id="tv_chart_container"></div>
-        
+
     </body>
 
 </html>

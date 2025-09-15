@@ -65,9 +65,9 @@
     │
     ├── brainy_charts.py               # The main user-facing module. It contains the `BrainyChart` class, which is the primary entry point for creating and managing charts. This class handles data processing, starts the backend server, and provides methods for interacting with the chart's features, such as drawing shapes.
     │
-    ├── chart.py                       # Data model for the symbols displayed on the chart. It holds metadata like the ticker, name, and exchange, along with the OHLCV data.
+    ├── shape.py                       # Shaping functionalities.
     │
-    ├── datafeed.py                    # Data feeding logic for the backend.
+    ├── symbol.py                      # Data model for the symbols displayed on the chart. It holds metadata like the ticker, name, and exchange, along with the bar data.
     │
     └── widget.py                      # The main chart's widget constructor
 ```
@@ -114,7 +114,6 @@ All internal JS and CSS codes of the library are inlined and minified to reduce 
     │
     └── changelog.md/
 ```
-
 
 </details>
 

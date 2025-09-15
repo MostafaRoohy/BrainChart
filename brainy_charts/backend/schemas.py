@@ -3,7 +3,9 @@
 # This is the API-layer definition, used for validation, serialization, and documentation.
 # Defines how data is represented in API requests and responses (the data validation layer).
 # This module defines the data shapes for API requests and responses using Pydantic,
+#
 # which ensures that the data moving through the API is validated and has the correct structure.
+#
 ###################################################################################################
 ###################################################################################################
 ###################################################################################################
@@ -26,39 +28,27 @@ class BarData(BaseModel):
     volume : float
 #
 
-class ShapeBase(BaseModel):
+class ShapeCreate(BaseModel):
 
-    shape_id   : Optional[str] = None
-    shape_code : int
+    symbol     : str
     shape_type : str
-    shape_data : dict
+    points     : List[Dict]
+    options    : Optional[Dict[str, Any]] = None
 #
 
-class ShapeCreate(ShapeBase):
-
-    pass
-#
-
-class ShapeResponse(ShapeBase):
+class ShapeResponse(BaseModel):
 
     id         : int
-    chart_id   : int
+    symbol     : str
+    shape_type : str
+    points     : List[Dict]
+    options    : Optional[Dict[str, Any]] = None
     created_at : datetime
-
-    class Config:
-
-        from_attributes = True
-    #
 #
 
 class ShapeAPIResponse(BaseModel):
 
-    id         : int
-    shape_id   : Optional[str]        = None
-    shape_code : int
-    shape_type : str
-    points     : List[Dict[str, Any]] = Field(default_factory=list)
-    properties : Dict[str, Any]       = Field(default_factory=dict)
+    items : List[ShapeResponse]
 #
 ###################################################################################################
 ###################################################################################################

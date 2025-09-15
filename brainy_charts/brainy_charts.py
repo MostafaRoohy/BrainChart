@@ -24,9 +24,8 @@ import json
 ###################################################################################################
 ################################################################################################### Modules
 #
-from .symbol       import Symbol
-from .chart_widget import ChartWidget
-from .shape        import multi_point_shapes, one_point_shapes
+from .symbol import Symbol
+from .widget import ChartWidget
 #
 ###################################################################################################
 ###################################################################################################
@@ -51,6 +50,13 @@ class BrainyChart:
         #
 
 
+        self.server_port = server_port
+        self.server_url  = f"http://localhost:{self.server_port}"
+
+        self.verbose     = verbose
+        self.jupyter     = jupyter
+
+
         package_dir  = Path(__file__).parent
         datafeed_dir = package_dir / "backend" / "datafeed"
         for item in os.listdir(datafeed_dir):
@@ -58,18 +64,13 @@ class BrainyChart:
             item_path = os.path.join(datafeed_dir, item)
             os.remove(item_path)
         #
+
+        self._register()
+
         for symbol in symbols_list:
 
             symbol._register()
         #
-
-
-
-        self.server_port = server_port
-        self.server_url  = f"http://localhost:{self.server_port}"
-
-        self.verbose     = verbose
-        self.jupyter     = jupyter
     #
     ##############################################################
     #
@@ -129,6 +130,21 @@ class BrainyChart:
         except subprocess.CalledProcessError:
 
             pass
+        #
+    #
+
+    def _register(self):
+
+        package_dir  = Path(__file__).parent
+        datafeed_dir = package_dir / "backend" / "datafeed"
+        datafeed_dir.mkdir(parents=True, exist_ok=True)
+
+        registry_path = datafeed_dir / "registry.json"
+        registry      = {"server_port":self.server_port, "server_url":self.server_url}
+
+        with open(registry_path, 'w', encoding='utf-8') as file:
+
+            json.dump(registry, file, indent=4)
         #
     #
 
