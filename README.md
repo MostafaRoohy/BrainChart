@@ -80,6 +80,10 @@ Next, we will have two major versions:
         + [CreateAnchoredShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/)
 
 
+3) **⬜️ Project ReDesign & BackEnd/FrontEnd Overview**
+   
+   + ⚪️ COMPLETE ReView & ReWire
+
 5) **⬜️ Custom Indicators & Timeseries**
    
     + ⚪️ Foundamentals
@@ -135,7 +139,7 @@ Next, we will have two major versions:
         + [Trading Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Trading-Sessions)
         + [Extended Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions)
 
-3) **⬜️ Project ReDesign & BackEnd/FrontEnd Overview**
+3) **⬜️ Project ReDesign & BackEnd/FrontEnd Overview (again)**
    
    + ⚪️ COMPLETE ReView & ReWire
 
