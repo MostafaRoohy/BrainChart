@@ -57,32 +57,32 @@ Next, we will have two major versions:
         + ✔️ [Universal DataFeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF)
         + ✔️ [DataFeed Issues](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-Issues)
 
-4) **▶️ Shaping Functionalities**
+4) **✅ Shaping Functionalities**
 
-    + 🔄 Base
-        + [Drawing](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/)
-        + [Drawings List](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/Drawings-List)
-        + [Drawings API](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/drawings-api)
+    + ☑️ Base
+        + ✔️ [Drawing](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/)
+        + ✔️ [Drawings List](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/Drawings-List)
+        + ✔️ [Drawings API](https://www.tradingview.com/charting-library-docs/latest/ui_elements/drawings/drawings-api)
 
-        + [createshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createshape)
-        + [CreateShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateShapeOptions/)
+        + ✔️ [createshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createshape)
+        + ✔️ [CreateShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateShapeOptions/)
 
-        + [getshapebyid()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#getshapebyid)
+        + ✔️ [getshapebyid()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#getshapebyid)
     
-    + ⚪️ Advanced
-        + [createmultipointshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createmultipointshape)
-        + [CreateMultipointShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateMultipointShapeOptions/)
+    + ☑️ Advanced
+        + ✔️ [createmultipointshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createmultipointshape)
+        + ✔️ [CreateMultipointShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateMultipointShapeOptions/)
 
-        + [createexecutionshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createexecutionshape)
-        + [IExecutionLineAdapter](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IExecutionLineAdapter/)
+        + ✖️ (postponed) [createexecutionshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createexecutionshape)
+        + ✖️ (postponed) [IExecutionLineAdapter](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IExecutionLineAdapter/)
 
-        + [createanchoredshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createanchoredshape)
-        + [CreateAnchoredShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/)
+        + ✖️ (postponed) [createanchoredshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createanchoredshape)
+        + ✖️ (postponed) [CreateAnchoredShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/)
 
 
-3) **⬜️ Project ReDesign & BackEnd/FrontEnd Overview**
+3) **▶️ Project ReDesign & BackEnd/FrontEnd Overview**
    
-   + ⚪️ COMPLETE ReView & ReWire
+    + 🔄 COMPLETE ReView & ReWire
 
 5) **⬜️ Custom Indicators & Timeseries**
    
