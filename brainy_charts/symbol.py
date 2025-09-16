@@ -859,27 +859,23 @@ class Symbol:
 
     def _register(self):
 
-        package_dir  = Path(__file__).parent
-        datafeed_dir = package_dir / "backend" / "datafeed"
+        root_dir      = Path(__file__).parent.parent
+        datafeed_dir  = root_dir / "runtime" / "datafeed"
         datafeed_dir.mkdir(parents=True, exist_ok=True)
-
-
-        csv_path              = datafeed_dir / f"{self.ticker}.csv"
-        self.tohlcv_df.to_csv(csv_path, index=False)
-
-
+        csv_path      = datafeed_dir / f"{self.ticker}.csv"
         registry_path = datafeed_dir / "registry.json"
-        registry      = {}
 
-        if (os.path.exists(registry_path)):
+        registry = {}
 
-            with open(registry_path, 'r', encoding='utf-8') as file:
+        if registry_path.exists():
+
+            with open(registry_path, 'r', encoding='utf-8') as f:
 
                 try:
 
-                    registry = json.load(file)
+                    registry = json.load(f)
                 #
-                except Exception as e:
+                except Exception:
 
                     registry = {}
                 #
@@ -887,11 +883,12 @@ class Symbol:
         #
 
         registry[self.ticker] = self._as_dict()
+        with open(registry_path, 'w', encoding='utf-8') as f:
 
-        with open(registry_path, 'w', encoding='utf-8') as file:
-
-            json.dump(registry, file, indent=4)
+            json.dump(registry, f, indent=4)
         #
+
+        self.tohlcv_df.to_csv(csv_path, index=False)
     #
 #
 ###################################################################################################

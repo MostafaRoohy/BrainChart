@@ -1,38 +1,94 @@
 #
-# This file contains all the backend's API endpoints or "routes",
-# handling HTTP requests for chart data, symbol information, and saving or loading shapes.
+# This is the FastAPI application
 #
 ###################################################################################################
 ###################################################################################################
-###################################################################################################
+################################################################################################### Imports
 #
-import time
 from pathlib import Path
+from typing import Optional, Any, Dict, List
+import json, hashlib
+
+# -----------------------------------------------
 
 import pandas as pd
 import numpy  as np
-import json
-import hashlib
 
-from fastapi import APIRouter, HTTPException, Query, Depends
+# -----------------------------------------------
+
+from fastapi import FastAPI, APIRouter, Depends, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
-from typing import Optional
 from sqlalchemy.orm import Session
 
+# -----------------------------------------------
 
-from .database import get_db, SessionLocal
-from .models import Chart, Shape
-from .schemas import ShapeCreate, ShapeResponse, ShapeAPIResponse
-import json
-from pathlib import Path
+from pydantic import BaseModel
+from datetime import datetime
+
+# -----------------------------------------------
+
+from .database import engine, Base, get_db, Shape
 #
 ###################################################################################################
 ###################################################################################################
-################################################################################################### Helpers
+################################################################################################### Directories
 #
-router       = APIRouter()
-DATAFEED_DIR = Path(__file__).parent / "datafeed"
+ROOT_DIR      = Path(__file__).resolve().parent.parent      # project root (BrainyCharts/)
+
+WIDGET_DIR    = ROOT_DIR / "runtime" / "widget"             # runtime/widget
+DATAFEED_DIR  = ROOT_DIR / "runtime" / "datafeed"           # runtime/datafeed
+WIDGET_DIR.mkdir(parents=True, exist_ok=True)
+DATAFEED_DIR.mkdir(parents=True, exist_ok=True)
+
+TV_LIB_DIR    = ROOT_DIR / "charting_library"               # charting_library/
+TV_DF_DIR     = ROOT_DIR / "charting_library" / "datafeeds" # charting_library/datafeeds/
+#
+###################################################################################################
+###################################################################################################
+################################################################################################### Schemas
+#
+class BarData(BaseModel):
+
+    time   : int
+    open   : float
+    high   : float
+    low    : float
+    close  : float
+    volume : float
+#
+
+class ShapeCreate(BaseModel):
+
+    symbol     : str
+    shape_type : str
+    points     : List[Dict]
+    options    : Optional[Dict[str, Any]] = None
+#
+
+class ShapeResponse(BaseModel):
+
+    id         : int
+    symbol     : str
+    shape_type : str
+    points     : List[Dict]
+    options    : Optional[Dict[str, Any]] = None
+    created_at : datetime
+#
+
+class ShapeAPIResponse(BaseModel):
+
+    items : List[ShapeResponse]
+#
+###################################################################################################
+###################################################################################################
+################################################################################################### Routes
+#
+router = APIRouter()
+
 
 def load_registry() -> dict:
 
@@ -73,10 +129,9 @@ def load_ticker_history_csv(ticker:str) -> pd.DataFrame:
 
     return (pd.read_csv(csv_path))
 #
-###################################################################################################
-###################################################################################################
-################################################################################################### Chart
-#
+
+
+
 @router.get("/config")
 async def get_config():
 
@@ -194,10 +249,9 @@ async def search_symbols(query:str="", type:Optional[str]=None, exchange:Optiona
 
     return (matches)
 #
-###################################################################################################
-###################################################################################################
-################################################################################################### Symbol
-#
+
+
+
 @router.get("/symbols")
 async def get_symbols(symbol:str):
 
@@ -282,10 +336,9 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
         return JSONResponse(content={"s": "error", "errmsg": str(e)})
     #
 #
-###################################################################################################
-###################################################################################################
-################################################################################################### Shapes
-#
+
+
+
 def _canon(obj):
 
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
@@ -397,6 +450,43 @@ def delete_shape(shape_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"ok": True}
+#
+###################################################################################################
+###################################################################################################
+################################################################################################### Mounts
+#
+app = FastAPI(title="BrainyCharts Backend")
+app.include_router(router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
+# Static mounts
+app.mount("/charting_library", StaticFiles(directory=str(TV_LIB_DIR), html=False), name="charting_library")
+app.mount("/datafeeds"       , StaticFiles(directory=str(TV_DF_DIR) , html=False), name="datafeeds")
+app.mount("/"                , StaticFiles(directory=str(WIDGET_DIR), html=True) , name="frontend")
+# region for now I decided to define the entry index.html as static mounting for the sake of symmetricity
+    # @app.get("/")
+    # def serve_widget_index():
+    #     index_path = FRONTEND_DIR / "index.html"
+    #     if not index_path.exists():
+    #         return JSONResponse(
+    #             {"error": "index.html not found", "expected": str(index_path)},
+    #             status_code=500,
+    #         )
+    #     #
+    #     return FileResponse(index_path)
+    # #
+# endregion
+#
+
+# Ensure tables exist
+Base.metadata.create_all(bind=engine)
 #
 ###################################################################################################
 ###################################################################################################

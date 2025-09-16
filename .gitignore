@@ -1,5 +1,3 @@
-.bAckups/
-brainy_charts/backend/datafeed/
-tradingview.db
-charting_library-master.zip
-playground/MyExample.ipynb
+/.bAckups/
+/runtime/
+/playground/MyExample.ipynb

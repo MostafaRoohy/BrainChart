@@ -1691,10 +1691,11 @@ class ChartWidget:
 
     def _generate_index_html(self):
 
-        bc_dir           = Path(__file__).parent
-        chart_widget_dir = bc_dir/"frontend"/"chart_widget"
-        chart_widget_dir.mkdir(parents=True, exist_ok=True)
-        frontend_file    = chart_widget_dir/"index.html"
+        root_dir      = Path(__file__).parent.parent
+        widget_dir    = root_dir / "runtime" / "widget"
+        widget_dir.mkdir(parents=True, exist_ok=True)
+        frontend_file = widget_dir / "index.html"
+
         
         with open(frontend_file, "w") as file:
 

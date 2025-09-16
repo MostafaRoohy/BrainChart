@@ -80,9 +80,9 @@ Next, we will have two major versions:
         + ✖️ (postponed) [CreateAnchoredShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/)
 
 
-3) **▶️ Project ReDesign & BackEnd/FrontEnd Overview**
+3) **✅ Project ReDesign & BackEnd/FrontEnd Overview**
    
-    + 🔄 COMPLETE ReView & ReWire
+    + ✔️ COMPLETE ReView & ReWire
 
 5) **⬜️ Custom Indicators & Timeseries**
    

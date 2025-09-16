@@ -849,8 +849,8 @@ def _server_url_from_registry() -> str:
 
     """Resolve backend base URL from backend/datafeed/registry.json (with fallback)."""
 
-    package_dir   = Path(__file__).parent
-    datafeed_dir  = package_dir / "backend" / "datafeed"
+    root_dir      = Path(__file__).parent.parent
+    datafeed_dir  = root_dir / "runtime" / "datafeed"
     datafeed_dir.mkdir(parents=True, exist_ok=True)
     registry_path = datafeed_dir / "registry.json"
 
@@ -868,6 +868,7 @@ def _server_url_from_registry() -> str:
 
     return reg.get("server_url", "http://localhost:8000")
 #
+
 
 def _symbol_str(symbol:Union["Symbol", str]) -> str:
 
