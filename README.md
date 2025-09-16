@@ -84,9 +84,10 @@ Next, we will have two major versions:
    
     + ✔️ COMPLETE ReView & ReWire
 
-5) **⬜️ Custom Indicators & Timeseries**
+
+4) **▶️ Custom TimeSeries Data**
    
-    + ⚪️ Foundamentals
+    + 🔄 Foundamentals
         + [Built-In Indicators](https://www.tradingview.com/charting-library-docs/latest/ui_elements/indicators/)
         + [Custom Study](https://www.tradingview.com/charting-library-docs/latest/custom_studies/)
     
@@ -158,6 +159,44 @@ Next, we will have two major versions:
 
         + [Trading Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Trading-Sessions)
         + [Extended Sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions)
+
+</details>
+
+
+<details>
+<summary>3️⃣ Version 3 RoadMap</summary>
+
+1) **⬜️ Custom Indicator/Study**
+   
+    + ⚪️ Foundamentals
+        + [Built-In Indicators](https://www.tradingview.com/charting-library-docs/latest/ui_elements/indicators/)
+        + [Custom Study](https://www.tradingview.com/charting-library-docs/latest/custom_studies/)
+    
+    + ⚪️ MetaInfo
+        + [MetaInfo](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/)
+        + [Custom Study Inputs](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/Custom-Studies-Inputs)
+        + [Custom Study Defaults](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/Custom-Studies-Defaults)
+    
+    + ⚪️ Custom Indicator
+        + [Custom Indicator Constructor](https://www.tradingview.com/charting-library-docs/latest/custom_studies/custom-indicator-constructor)
+        + [PineJS](https://www.tradingview.com/charting-library-docs/latest/custom_studies/PineJS-Utility-Functions)
+        + [Custom Study Plots](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-Plots)
+        + [Custom Study OHLC Plots](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-OHLC-Plots)
+    
+    + ⚪️ Other
+        + [Examples](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-Examples)
+        + [Extending The Time Scale](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Studies-Extending-The-Time-Scale)
+
+
+2) **⬜️ Advanced Shaping Functionalities**
+
+    + ⚪️ Execution Shape
+        + [createexecutionshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createexecutionshape)
+        + [IExecutionLineAdapter](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IExecutionLineAdapter/)
+
+        + [createanchoredshape()](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IChartWidgetApi/#createanchoredshape)
+        + [CreateAnchoredShapeOptions](https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.CreateAnchoredShapeOptions/)
+
 
 </details>
 
