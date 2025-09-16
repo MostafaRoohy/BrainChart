@@ -87,6 +87,60 @@ index_html_raw = r'''
                 widget.onChartReady(function () {{
                     const chart   = widget.activeChart();
 
+                    // === BrainyCharts: auto-add custom series per brainy_series_list ===
+                    function removeBrainySeriesStudies() {{
+                    const studies = chart.getAllStudies() || [];
+                    for (const s of studies) {{
+                        // Any Compare study pointing to our virtual #SERIES symbols
+                        const desc = (s && (s.description || s.name || "")).toString();
+                        if (desc.includes("#SERIES:")) {{
+                        try {{ chart.removeEntity(s.id); }} catch (_) {{}}
+                        }}
+                    }}
+                    }}
+
+                    async function addBrainySeriesFromSymbolExt() {{
+                    const ext  = chart.symbolExt && chart.symbolExt();
+                    const list = ext && ext.library_custom_fields && ext.library_custom_fields.brainy_series_list;
+                    if (!Array.isArray(list) || list.length === 0) return;
+
+                    removeBrainySeriesStudies();
+
+                    const base = chart.symbol();
+                    for (const spec of list) {{
+                        if (!spec || !spec.col) continue;
+
+                        const childSymbol = `${{base}}#SERIES:${{spec.col}}`;
+
+                        // Build per-indicator overrides (no indicator name in keys)
+                        const overrides = {{}};
+                        // Force a line style so the color key below applies to a line
+                        overrides["style"] = 2; // 2 = line
+                        if (spec.color) overrides["lineStyle.color"] = spec.color;  // <- correct key
+
+                        // Create Overlay. If panel === "overlay" it’s merged; otherwise we’ll unmerge below.
+                        const studyId = chart.createStudy(
+                        "Overlay",
+                        spec.panel === "overlay",
+                        false,
+                        {{ symbol: childSymbol }},
+                        overrides
+                        );
+
+                        if (spec.panel === "pane") {{
+                        try {{
+                            const api = chart.getStudyById(studyId);
+                            if (api && api.paneIndex() === 0) api.unmergeDown();
+                        }} catch (e) {{ console.warn("Could not move study to its own pane:", e); }}
+                        }}
+                    }}
+                    }}
+
+
+                    // run now and on every symbol change
+                    addBrainySeriesFromSymbolExt();
+                    chart.onSymbolChanged().subscribe(null, addBrainySeriesFromSymbolExt);
+
                     // state
                     const renderedById        = new Map();  // server shape id -> entityId (number)
                     const serverIdByEntityId  = new Map();  // entityId (number) -> server shape id
@@ -183,40 +237,40 @@ index_html_raw = r'''
                         }} catch (_) {{ return []; }}
                     }}
 
-async function draw(rec) {{
-  const sig  = makeSig(rec);
-  const pts  = toPoints(rec.points);
-  const opts = Object.assign({{ shape: rec.shape_type }}, rec.options || {{}});
+                    async function draw(rec) {{
+                    const sig  = makeSig(rec);
+                    const pts  = toPoints(rec.points);
+                    const opts = Object.assign({{ shape: rec.shape_type }}, rec.options || {{}});
 
-  // If this id already exists and content did not change, skip
-  if (rec.id && sigById.get(rec.id) === sig) return;
+                    // If this id already exists and content did not change, skip
+                    if (rec.id && sigById.get(rec.id) === sig) return;
 
-  // Update existing entity in-place if this id is already on the chart
-  if (rec.id && renderedById.has(rec.id)) {{
-    const entityId = renderedById.get(rec.id);
-    const api = chart.getShapeById(entityId);
-    try {{
-      if (api) {{
-        api.setPoints(pts);
-        api.setProperties(opts);
-        sigById.set(rec.id, sig);
-        return; // <-- no recreation
-      }}
-    }} catch (e) {{ console.error(e); }}
-    // fallthrough → recreate if api missing/failed
-  }}
+                    // Update existing entity in-place if this id is already on the chart
+                    if (rec.id && renderedById.has(rec.id)) {{
+                        const entityId = renderedById.get(rec.id);
+                        const api = chart.getShapeById(entityId);
+                        try {{
+                        if (api) {{
+                            api.setPoints(pts);
+                            api.setProperties(opts);
+                            sigById.set(rec.id, sig);
+                            return; // <-- no recreation
+                        }}
+                        }} catch (e) {{ console.error(e); }}
+                        // fallthrough → recreate if api missing/failed
+                    }}
 
-  if (rec.id != null) pendingCreates.push(rec.id); // optional, keeps the event flow consistent
-  const entityId = (pts.length === 1)
-    ? chart.createShape(pts[0], opts)
-    : chart.createMultipointShape(pts, opts);
+                    if (rec.id != null) pendingCreates.push(rec.id); // optional, keeps the event flow consistent
+                    const entityId = (pts.length === 1)
+                        ? chart.createShape(pts[0], opts)
+                        : chart.createMultipointShape(pts, opts);
 
-  if (rec.id != null && entityId != null) {{
-    renderedById.set(rec.id, entityId);
-    serverIdByEntityId.set(entityId, rec.id);
-    sigById.set(rec.id, sig);
-  }}
-}}
+                    if (rec.id != null && entityId != null) {{
+                        renderedById.set(rec.id, entityId);
+                        serverIdByEntityId.set(entityId, rec.id);
+                        sigById.set(rec.id, sig);
+                    }}
+                    }}
 
                     
                     async function incrementalRefresh() {{

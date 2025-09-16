@@ -136,6 +136,12 @@ def load_ticker_history_csv(ticker:str) -> pd.DataFrame:
     return (pd.read_csv(csv_path))
 #
 
+def parse_series_symbol(raw:str) -> tuple[str, str]|None:
+
+    SERIES_SEP = "#SERIES:"
+    return (raw.split(SERIES_SEP, 1) if raw and SERIES_SEP in raw else None)
+#
+
 
 
 @router.get("/config")
@@ -259,10 +265,34 @@ async def search_symbols(query:str="", type:Optional[str]=None, exchange:Optiona
 
 
 @router.get("/symbols")
-async def get_symbols(symbol:str):
+async def get_symbols(symbol: str):
+
+    pair = parse_series_symbol(symbol)
+    if (pair):
+
+        base, col = pair
+
+        try:
+
+            base_meta = load_ticker_metadata(base)
+        #
+        except HTTPException as e:
+
+            return {"s": "error", "errmsg": str(e.detail)}
+        #
+
+        meta = dict(base_meta)
+
+        meta["ticker"]      = symbol
+        meta["name"]        = f"{base_meta.get('name', base)} ({col})"
+        meta["full_name"]   = meta.get("full_name", meta["ticker"])
+        meta["description"] = f"{base_meta.get('description', base)} • Series: {col}"
+
+        return (meta)
+    #
+
 
     meta = {}
-
     try:
 
         meta.update(load_ticker_metadata(symbol))
@@ -279,17 +309,76 @@ async def get_symbols(symbol:str):
 async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias="from", description="Start time of the data"), to_time:int=Query(..., alias="to", description="End time of the data"), countback:Optional[int]=None):
 
     try:
-
-        if (not symbol):
+        
+        if not symbol:
 
             raise HTTPException(status_code=400, detail="Symbol parameter is required")
         #
 
+
+        pair = parse_series_symbol(symbol)
+        if (pair):
+
+            base, col = pair
+            df        = load_ticker_history_csv(base)
+
+            if (col not in df.columns):
+
+                return JSONResponse(content={"s":"no_data", "nextTime": from_time})
+            #
+
+            x = df[["timestamp", col]].copy()
+
+            if (resolution == "1D"):
+
+                x["timestamp"] = pd.to_datetime(x["timestamp"], unit="ms")
+                x = (
+                    x.set_index("timestamp")[col]
+                     .resample("D").last()
+                     .dropna()
+                     .reset_index()
+                )
+                x["timestamp"] = x["timestamp"].astype(np.int64) // 10**6
+            #
+            else:
+
+                x = x.dropna()
+            #
+
+            if (countback is not None):
+
+                mask = (x["timestamp"] < to_time*1000)
+                xf   = x[mask].sort_values("timestamp").tail(countback).reset_index(drop=True)
+            #
+            else:
+
+                mask = (x["timestamp"] >= from_time*1000) & (x["timestamp"] < to_time*1000)
+                xf   = x[mask].sort_values("timestamp").reset_index(drop=True)
+            #
+
+            if (xf.empty):
+
+                return JSONResponse(content={"s":"no_data", "nextTime": from_time})
+            #
+
+            ts  = (xf["timestamp"]/1000).astype(int).tolist()
+            arr = xf[col].astype(float).tolist()
+
+            return JSONResponse(content={
+                "s": "ok",
+                "t": ts,
+                "o": arr,
+                "h": arr,
+                "l": arr,
+                "c": arr,
+                "v": [0]*len(arr),
+            })
+        #
+
+
         df          = load_ticker_history_csv(symbol)
         filtered_df = None
-
-
-        if (from_time > 0  or  to_time > 0):
+        if (from_time > 0 or to_time > 0):
 
             if (resolution == '1D'):
 
@@ -304,7 +393,6 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
                 df['timestamp'] = df['timestamp'].astype(np.int64) // 10**6
             #
 
-
             if (countback is not None):
 
                 mask        = (df['timestamp'] < to_time*1000)
@@ -316,8 +404,7 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
                 filtered_df = df[mask].sort_values(by=['timestamp']).reset_index(drop=True)
             #
 
-
-            if (filtered_df.empty  or  len(filtered_df) == 0):
+            if (filtered_df.empty or len(filtered_df) == 0):
 
                 return JSONResponse(content={"s":"no_data", "nextTime":from_time})
             #

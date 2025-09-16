@@ -85,26 +85,26 @@ Next, we will have two major versions:
     + ✔️ COMPLETE ReView & ReWire
 
 
-4) **▶️ Custom TimeSeries Data**
+4) **✅ Custom TimeSeries Data**
    
-    + 🔄 Foundamentals
-        + [Built-In Indicators](https://www.tradingview.com/charting-library-docs/latest/ui_elements/indicators/)
-        + [Custom Study](https://www.tradingview.com/charting-library-docs/latest/custom_studies/)
+    + ☑️ Foundamentals
+        + ✖️ (postponed) [Built-In Indicators](https://www.tradingview.com/charting-library-docs/latest/ui_elements/indicators/)
+        + ✖️ (postponed) [Custom Study](https://www.tradingview.com/charting-library-docs/latest/custom_studies/)
     
-    + ⚪️ MetaInfo
-        + [MetaInfo](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/)
-        + [Custom Study Inputs](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/Custom-Studies-Inputs)
-        + [Custom Study Defaults](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/Custom-Studies-Defaults)
+    + ☑️ MetaInfo
+        + ✖️ (postponed) [MetaInfo](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/)
+        + ✖️ (postponed) [Custom Study Inputs](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/Custom-Studies-Inputs)
+        + ✖️ (postponed) [Custom Study Defaults](https://www.tradingview.com/charting-library-docs/latest/custom_studies/metainfo/Custom-Studies-Defaults)
     
-    + ⚪️ Custom Indicator
-        + [Custom Indicator Constructor](https://www.tradingview.com/charting-library-docs/latest/custom_studies/custom-indicator-constructor)
-        + [PineJS](https://www.tradingview.com/charting-library-docs/latest/custom_studies/PineJS-Utility-Functions)
-        + [Custom Study Plots](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-Plots)
-        + [Custom Study OHLC Plots](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-OHLC-Plots)
+    + ☑️ Custom Indicator
+        + ✖️ (postponed) [Custom Indicator Constructor](https://www.tradingview.com/charting-library-docs/latest/custom_studies/custom-indicator-constructor)
+        + ✖️ (postponed) [PineJS](https://www.tradingview.com/charting-library-docs/latest/custom_studies/PineJS-Utility-Functions)
+        + ✔️ [Custom Study Plots](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-Plots)
+        + ✔️ [Custom Study OHLC Plots](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-OHLC-Plots)
     
-    + ⚪️ Other
-        + [Examples](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-Examples)
-        + [Extending The Time Scale](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Studies-Extending-The-Time-Scale)
+    + ☑️ Other
+        + ✖️ (postponed) [Examples](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Custom-Studies-Examples)
+        + ✖️ (postponed) [Extending The Time Scale](https://www.tradingview.com/charting-library-docs/latest/custom_studies/Studies-Extending-The-Time-Scale)
 
 </details>
 

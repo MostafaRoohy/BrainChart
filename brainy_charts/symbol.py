@@ -712,6 +712,9 @@ class Symbol:
             ################################################################################################## Urgent
             #
             tohlcv_df                : pd.DataFrame                      = pd.DataFrame(),
+            series_column            : list[str]                         = None,
+            series_color             : list[str]                         = None,
+            series_panel             : list[str]                         = None,
             ticker                   : str                               = "TICKER",
             name                     : str                               = "Name",
             base_name                : Optional[List[str]]               = None,
@@ -807,6 +810,10 @@ class Symbol:
 
 
         self.tohlcv_df              = tohlcv_df
+        self.series_column          = series_column
+        self.series_color           = series_color
+        self.series_panel           = series_panel
+
         self.ticker                 = (ticker)  if  (ticker!="TICKER")  else  (f"TICKER_{len(Symbol._tickers)}")
         self.name                   = name
         self.base_name              = base_name
@@ -852,6 +859,23 @@ class Symbol:
         Symbol._tickers.append(self.ticker)
     #
 
+    def _normalize_series_specs(self, default_color:str="#22c55e", default_panel:str ="pane") -> list[dict]:
+        
+        cols   = self.series_column or []
+        colors = self.series_color  or []
+        panels = self.series_panel  or []
+        out    = []
+
+        for i, col in enumerate(cols):
+
+            color = colors[i] if i < len(colors) and colors[i] else default_color
+            pane  = panels[i] if i < len(panels) and panels[i] else default_panel
+            out.append({"col": col, "color": color, "panel": pane})
+        #
+
+        return out
+    #
+
     def _as_dict(self):
 
         return {key: value for key, value in self.__dict__.items() if (value is not None  and  not isinstance(value, pd.DataFrame))}
@@ -882,7 +906,20 @@ class Symbol:
             #
         #
 
-        registry[self.ticker] = self._as_dict()
+        
+
+        symbol_info = self._as_dict()
+        specs       = self._normalize_series_specs()
+        if (specs):
+
+            lcf = dict(symbol_info.get("library_custom_fields") or {})
+            lcf["brainy_series_list"] = specs
+            symbol_info["library_custom_fields"] = lcf
+        #
+
+
+        registry[self.ticker] = symbol_info
+
         with open(registry_path, 'w', encoding='utf-8') as f:
 
             json.dump(registry, f, indent=4)
