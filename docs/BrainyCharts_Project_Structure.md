@@ -12,6 +12,7 @@
   - **`env/`**: Environment-related files, such as conda environment configurations and pip requirements.
   - **`icons/`**: Icons used in the project.
   - **`playground/`**: A testing playground.
+  - **`runtime/`**: Files and Folders generated while running the app.
   - **`.gitignore`**: Git Ignores.
   - **`LICENSE`**: License.
   - **`README.md`**: Read Me.
@@ -24,52 +25,23 @@
 <summary>brainy_charts/</summary>
 
 ```bash
-    brainy_charts/                     # The core package for the BrainyCharts application, containing all the logic for data handling, server management, and chart rendering.
+    brainy_charts/                                 # The core package for the BrainyCharts application, containing all the logic for data handling, server management, and chart rendering.
     │
-    ├── backend/
-    │   │
-    │   ├── database/
-    │   │   ├── migrations/
-    │   │   ├── alembic.ini
-    │   │   └── tradingview.db.ini
-    │   │
-    │   ├── datafeed/
-    │   │   ├── symbol_unique_name_1.csv
-    │   │   ├── symbol_unique_name_2.csv
-    │   │   ├── symbol_unique_name_3.csv
-    │   │   ├── .
-    │   │   ├── .
-    │   │   ├── .
-    │   │   └── registry.json
-    │   │
-    │   ├── __init__.py
-    │   │
-    │   ├── database.py                # Configures the connection to the SQLite database using SQLAlchemy and manages database sessions.
-    │   │
-    │   ├── main.py                    # The entry point for the FastAPI application. It initializes the app, configures middleware, and includes the API routes.
-    │   │
-    │   ├── models.py                  # Defines the database schema using SQLAlchemy ORM, including the `Chart` and `Shape` tables.
-    │   │
-    │   ├── routes.py                  # Contains all the API endpoints for the backend, handling requests for symbol information, historical data, and shape manipulation.
-    │   │
-    │   └── schemas.py                 # Defines the Pydantic models for API data validation, ensuring that request and response data structures are correct.
+    ├── __init__.py                                # Marks the `brainy_charts` directory as a Python package, allowing its modules to be imported.
     │
+    ├── brainy.py                                  # The main user-facing module. It contains the `BrainyChart` class, which is the primary entry point for creating and managing charts. This class handles data processing, starts the backend server, and provides methods for interacting with the chart's features, such as drawing shapes.
     │
-    ├── frontend/
-    │   │
-    │   └── chart_widget/
-    │       └── index.html             # The HTML file that renders the TradingView charting library widget in the browser.
+    ├── custom_indicators.py                       # Custom indicator/study functionalities.
     │
+    ├── database.py                                # Configures the connection to the SQLite database using SQLAlchemy and manages database sessions.
     │
-    ├── __init__.py                    # Marks the `brainy_charts` directory as a Python package, allowing its modules to be imported.
+    ├── fast_api.py                                # The entry point for the FastAPI application. It initializes the app, configures middleware, and includes the API routes.
     │
-    ├── brainy_charts.py               # The main user-facing module. It contains the `BrainyChart` class, which is the primary entry point for creating and managing charts. This class handles data processing, starts the backend server, and provides methods for interacting with the chart's features, such as drawing shapes.
+    ├── shape.py                                   # Shaping functionalities.
     │
-    ├── shape.py                       # Shaping functionalities.
+    ├── symbol.py                                  # Data model for the symbols displayed on the chart. It holds metadata like the ticker, name, and exchange, along with the bar data.
     │
-    ├── symbol.py                      # Data model for the symbols displayed on the chart. It holds metadata like the ticker, name, and exchange, along with the bar data.
-    │
-    └── widget.py                      # The main chart's widget constructor
+    └── widget.py                                  # The main chart's widget constructor
 ```
 
 </details>
