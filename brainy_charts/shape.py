@@ -1000,7 +1000,7 @@ def _options_to_dict(options:Optional[Union[ShapeOptions, Dict[str, Any], Drawin
 ###################################################################################################
 ################################################################################################### Shaping
 #
-def CreateShape(symbol:Symbol|str, shape_type:ShapeType, points:Union[ShapePoint, Sequence[ShapePoint]], *, options:Optional[Union[ShapeOptions, Dict[str, Any]]] = None) -> Dict:
+def CreateShape(symbol:Symbol|str, shape_type:ShapeType, points:Union[ShapePoint, Sequence[ShapePoint]], *, options:Optional[Union[ShapeOptions, Dict[str, Any]]]=None, shape_id:Optional[int]=None) -> Dict:
     
     """
     Create a TradingView drawing with typed points.
@@ -1041,11 +1041,14 @@ def CreateShape(symbol:Symbol|str, shape_type:ShapeType, points:Union[ShapePoint
         "options"   : _options_to_dict(options, shape_value),
     }
 
-    response = requests.post(f"{server_url}/shapes", json=payload, timeout=10)
 
-    if (response.status_code >= 400):
+    if (shape_id is not None):
 
-        raise ShapeError(f"CreateShape failed: {response.status_code} {response.text}")
+        response = requests.put(f"{server_url}/shapes/{int(shape_id)}", json=payload, timeout=10)
+    #
+    else:
+
+        response = requests.post(f"{server_url}/shapes", json=payload, timeout=10)
     #
 
     return (response.json())
@@ -1155,6 +1158,11 @@ class Shapes:
     def create(self, shape_type:ShapeType, points:ShapePoint|Sequence[ShapePoint], options:ShapeOptions|dict|DrawingOverrides|None=None) -> dict:
 
         return CreateShape(self.symbol, shape_type, points, options=options)
+    #
+
+    def update(self, shape_id:int, shape_type:ShapeType, points:ShapePoint|Sequence[ShapePoint], options:ShapeOptions|dict|DrawingOverrides|None=None) -> dict:
+
+        return CreateShape(self.symbol, shape_type, points, options=options, shape_id=shape_id)
     #
 
     def all(self) -> list[dict]:

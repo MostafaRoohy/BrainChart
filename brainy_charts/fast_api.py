@@ -1,6 +1,4 @@
 #
-# This is the FastAPI application
-#
 ###################################################################################################
 ###################################################################################################
 ################################################################################################### Imports
@@ -67,6 +65,14 @@ class ShapeCreate(BaseModel):
     shape_type : str
     points     : List[Dict]
     options    : Optional[Dict[str, Any]] = None
+#
+
+class ShapeUpdate(BaseModel):
+
+    symbol     : Optional[str]               = None
+    shape_type : Optional[str]               = None
+    points     : Optional[List[Dict]]        = None
+    options    : Optional[Dict[str, Any]]    = None
 #
 
 class ShapeResponse(BaseModel):
@@ -344,30 +350,32 @@ def _canon(obj):
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 #
 
-@router.post("/shapes", response_model=ShapeResponse)
-def create_shape(payload: ShapeCreate, db: Session = Depends(get_db)):
+def _normalize_points(points: List[Dict]) -> List[Dict]:
 
     pts = []
 
-    for p in payload.points:
+    for p in (points or []):
 
         q = dict(p)
 
-        if ("time" in q):
+        if "time" in q:   q["time"]   = int(q["time"])
+        if "id" in q:     q["id"]     = int(q["id"])
+        if "price" in q:  q["price"]  = float(q["price"])
+        if "channel" in q and q["channel"] is not None:
 
-            q["time"] = int(q["time"])
-        #
-        if ("id" in q):
-
-            q["id"] = int(q["id"])
-        #
-        if ("price" in q):
-
-            q["price"] = float(q["price"])
+            q["channel"] = str(q["channel"])
         #
 
         pts.append(q)
     #
+
+    return pts
+#
+
+@router.post("/shapes", response_model=ShapeResponse)
+def create_shape(payload: ShapeCreate, db: Session = Depends(get_db)):
+
+    pts = _normalize_points(payload.points)
 
     sig_src = f"{payload.symbol}|{payload.shape_type}|{_canon(pts)}|{_canon(payload.options or {})}"
     sig     = hashlib.sha1(sig_src.encode("utf-8")).hexdigest()
@@ -390,29 +398,38 @@ def create_shape(payload: ShapeCreate, db: Session = Depends(get_db)):
         "options": shape.options,
         "created_at": shape.created_at,
     }
-
-    shape = Shape(
-        symbol     = payload.symbol,
-        shape_type = payload.shape_type,
-        points     = pts,
-        options    = payload.options or {},
-        sig        = sig,
-    )
-
-    db.add(shape)
-    db.commit()
-    db.refresh(shape)
-
-    return {
-        "id": shape.id,
-        "symbol": shape.symbol,
-        "shape_type": shape.shape_type,
-        "points": shape.points,
-        "options": shape.options,
-        "created_at": shape.created_at,
-    }
 #
 
+@router.put("/shapes/{shape_id}", response_model=ShapeResponse)
+def update_shape(shape_id: int, payload: ShapeUpdate, db: Session = Depends(get_db)):
+    s = db.get(Shape, shape_id)
+    if not s:
+        raise HTTPException(404, "shape not found")
+
+    if payload.symbol is not None:
+        s.symbol = payload.symbol
+    if payload.shape_type is not None:
+        s.shape_type = payload.shape_type
+    if payload.points is not None:
+        s.points = _normalize_points(payload.points)
+    if payload.options is not None:
+        s.options = payload.options
+
+    sig_src = f"{s.symbol}|{s.shape_type}|{_canon(s.points)}|{_canon(s.options or {})}"
+    s.sig   = hashlib.sha1(sig_src.encode("utf-8")).hexdigest()
+
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    return {
+        "id": s.id,
+        "symbol": s.symbol,
+        "shape_type": s.shape_type,
+        "points": s.points,
+        "options": s.options,
+        "created_at": s.created_at,
+    }
+#
 
 @router.get("/shapes", response_model=ShapeAPIResponse)
 def list_shapes(symbol: str | None = None, db: Session = Depends(get_db)):
