@@ -73,7 +73,7 @@ Below are concise, working examples.
 
 All exampled csv files exist in `playground/candle_data/`.
 
-*You can see all the examples in `playground/example.ipynb`*
+*You can see all the examples in `playground/example.ipynb`.*
 
 ### 1. Minimal end‑to‑end (symbol, widget)
 
