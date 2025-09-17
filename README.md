@@ -71,6 +71,8 @@ pip install -r env/requirements.txt
 
 Below are concise, working examples. All paths are relative to the repo root.
 
+*You can see all the examples is `playground/example.ipynb`*
+
 ### 1. Minimal end‑to‑end (symbol, widget)
 
 ```python
