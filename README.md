@@ -69,9 +69,9 @@ pip install -r env/requirements.txt
 
 ## ✔️ Examples
 
-Below are concise, working examples. All paths are relative to the repo root.
+Below are concise, working examples. All exampled csv files exist in `/playground/candle_data/`.
 
-*You can see all the examples is `playground/example.ipynb`*
+*You can see all the examples in `playground/example.ipynb`*
 
 ### 1. Minimal end‑to‑end (symbol, widget)
 
