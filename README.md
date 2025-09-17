@@ -69,7 +69,9 @@ pip install -r env/requirements.txt
 
 ## ✔️ Examples
 
-Below are concise, working examples. All exampled csv files exist in `/playground/candle_data/`.
+Below are concise, working examples.
+
+All exampled csv files exist in `playground/candle_data/`.
 
 *You can see all the examples in `playground/example.ipynb`*
 
