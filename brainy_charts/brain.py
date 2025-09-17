@@ -31,7 +31,7 @@ from .widget import ChartWidget
 #
 class BrainyChart:
 
-    def __init__(self, symbols_list:List[Symbol]=None, chart_widget:ChartWidget=None, server_port=8000, verbose:bool=False, jupyter:bool=False):
+    def __init__(self, symbols_list:List[Symbol]=None, chart_widget:ChartWidget=None, server_port=8000):
         
         if (symbols_list is None):
 
@@ -50,9 +50,6 @@ class BrainyChart:
 
         self.server_port = server_port
         self.server_url  = f"http://localhost:{self.server_port}"
-
-        self.verbose     = verbose
-        self.jupyter     = jupyter
 
 
         self._register()
@@ -89,41 +86,6 @@ class BrainyChart:
     #    
     ##############################################################
     #
-    def run_servers(self):
-
-        try:
-
-            print(f"Starting server on port {self.server_port}...")
-
-            package_dir = Path(__file__).parent
-            root_dir    = package_dir.parent
-
-            module_path = "brainy_charts.fast_api:app"
-
-            cmd = ["uvicorn", module_path, "--host", "0.0.0.0", "--port", str(self.server_port)]
-
-            # Ensure the project root is on PYTHONPATH so 'brainy_charts.*' imports work
-            env = os.environ.copy()
-            env["PYTHONPATH"] = str(root_dir) + (os.pathsep + env.get("PYTHONPATH",""))
-            
-            if (self.verbose==True):
-                            
-                return (subprocess.Popen(cmd, cwd=str(root_dir), env=env))
-            #
-            else:
-
-                with open(os.devnull, 'w') as fnull:
-
-                    return (subprocess.Popen(cmd, cwd=str(root_dir), env=env, stdout=fnull, stderr=fnull))
-                #
-            #
-        #
-        except Exception as e:
-
-            print(f"Error running server: {e}")
-        #
-    #
-
     def kill_servers(self):
 
         try:
@@ -143,22 +105,57 @@ class BrainyChart:
         #
     #
 
-    def imagine(self, width=1200, height=600):
+    def run_servers(self, verbose:bool):
+
+        try:
+
+            print(f"Starting server on port {self.server_port}...")
+
+            package_dir = Path(__file__).parent
+            root_dir    = package_dir.parent
+
+            module_path = "brainy_charts.fast_api:app"
+
+            cmd = ["uvicorn", module_path, "--host", "0.0.0.0", "--port", str(self.server_port)]
+
+            # Ensure the project root is on PYTHONPATH so 'brainy_charts.*' imports work
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(root_dir) + (os.pathsep + env.get("PYTHONPATH",""))
+            
+            if (verbose):
+                            
+                return (subprocess.Popen(cmd, cwd=str(root_dir), env=env))
+            #
+            else:
+
+                with open(os.devnull, 'w') as fnull:
+
+                    return (subprocess.Popen(cmd, cwd=str(root_dir), env=env, stdout=fnull, stderr=fnull))
+                #
+            #
+        #
+        except Exception as e:
+
+            print(f"Error running server: {e}")
+        #
+    #
+
+    def imagine(self, width=1200, height=600, verbose:bool=False, jupyter:bool=False):
 
         self.kill_servers()
-        self.run_servers()
+        self.run_servers(verbose=verbose)
 
         print("Please wait...")
         time.sleep(4)
 
 
-        if (not self.verbose or self.jupyter):
+        if (not verbose  or  jupyter):
 
             clear_output()
         #
 
 
-        if (self.jupyter):
+        if (jupyter):
 
             return (IFrame(src=self.server_url, width=width, height=height))
         #
