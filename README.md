@@ -1,30 +1,327 @@
 # BrainyCharts
-*Python Wrapper For Tradingview's Advanced Charts*
 
------------------------------------------------------------------------------------------------------------------------------------------------------
+*A Python wrapper around TradingView’s Advanced Charting Library with a Pythonic datafeed, widget generator, and runtime shape‑API.*
 
-**Seamlessly integrate TradingView's world-class Advanced Charts into your Python workflows.**  
-*A bridge between pythonic algo-trading and the most beautiful financial visualizations.*
+---
 
-## 🌟 Why This Project?
+## ✨
 
-TradingView's charts are the gold standard in financial visualization, but using them programmatically in Python has been nearly impossible – until now. This library lets you:
+**BrainyCharts** — Python × TradingView Advanced Charts
 
-✅ **Render TradingView's** directly in Jupyter notebooks or web apps *(Under Developement)*  
-✅ **Sync Python data** (Pandas, NumPy) with TradingView's interactive widgets *(Under Developement)*   
+BrainyCharts connects your Python data (Pandas/NumPy) to TradingView’s Advanced Charting Library. It provides:
 
------------------------------------------------------------------------------------------------------------------------------------------------------
+* A minimal **UDF-compatible FastAPI backend** (`/config`, `/search`, `/symbols`, `/history`, `/time`).
+* A **Symbol** model to register local OHLCV CSV + metadata.
+* A **ChartWidget** generator that writes a self-contained `runtime/widget/index.html` to open in a browser.
+* A runtime **Shapes API** (REST wrappers) to create/list/delete drawings on a specific symbol.
 
-## 🎯 RoadMap
+You keep full control in Python; the library handles the ACL plumbing.
+
+---
+
+## 🤔 Why I created this
+
+Using TradingView’s [Advanced Charting Library](www.tradingview.com/charting-library-docs/) from Python usually means writing a custom datafeed, serving files, and glueing JS <> Python. This project streamlines that:
+
+* Register symbols from a Pandas DataFrame.
+* Serve data via a ready-made UDF backend.
+* Generate a working widget page.
+* Inject drawings programmatically.
+
+Objective: fast iteration for research and prototyping without switching stacks.
+
+---
+
+## ℹ️ Installation Instructions
+
+### Option A — Conda (recommended)
+
+```bash
+# clone the repo
+git clone https://github.com/MostafaRoohy/BrainyCharts.git
+cd BrainyCharts
+
+# create and activate the environment
+conda env create -f env/environment.yml
+conda activate brainycharts
+```
+
+### Option B — pip
+
+```bash
+pip install -r env/requirements.txt
+```
+
+> Note: The project is not yet packaged. Import from the repo root (so `import brainy_charts` works) or add the repo to `PYTHONPATH`.
+
+---
+
+## 📝 Requirements
+
+* **Python**: 3.12
+* **Packages** (see `env/requirements.txt` or `env/environment.yml`):
+
+  * `fastapi`, `uvicorn`, `pandas`, `numpy`, `pydantic`, `requests`, `SQLAlchemy`, `ipython`, `ipykernel`
+
+**Proposed workflow:** use the provided **Conda** `env/environment.yml` to ensure deterministic environments across contributors.
+
+---
+
+## ✔️ Examples
+
+Below are concise, working examples. All paths are relative to the repo root.
+
+### 1. Minimal end‑to‑end (symbol, widget)
+
+```python
+import time
+import pandas as pd
+from brainy_charts import Symbol, ChartWidget, BrainyChart
+
+
+# 1) Prepare OHLCV DataFrame (timestamp in ms)
+df_1 = pd.read_csv("./candle_data/CardGlass.csv")
+
+
+# 2) Define the symbol with the DataFrame
+symbol_1 = Symbol(tohlcv_df   = df_1,
+                  ticker      = "CGSS",
+                  name        = "CardGlass",
+                  description = "CardGlass is a symbol",
+                  exchange    = "DEx")
+
+
+# 3) Create the widget with the default symbol
+widget = ChartWidget(symbol=symbol_1)
+
+
+# 3) Create the BrainyChart
+brainy_chart = BrainyChart(symbols_list=[symbol_1], chart_widget=widget)
+brainy_chart.imagine()
+
+
+# 4) Open browser and navigate to the generated server: http://localhost:8000
+```
+
+### 2. Two symbols + default widget
+
+```python
+import pandas as pd
+from brainy_charts import Symbol, ChartWidget, BrainyChart
+
+
+# 1) Prepare OHLCV DataFrame (timestamp in ms)
+df_1 = pd.read_csv("./candle_data/CardGlass.csv")
+df_2 = pd.read_csv("./candle_data/RageGuy.csv")
+
+
+# 2) Define the symbol with the DataFrame
+symbol_1 = Symbol(tohlcv_df   = df_1,
+                  ticker      = "CGSS",
+                  name        = "CardGlass",
+                  description = "CardGlass is a symbol",
+                  exchange    = "DEx")
+
+symbol_2 = Symbol(tohlcv_df   = df_2,
+                  ticker      = "RGG",
+                  name        = "Rage Guy",
+                  description = "Rage Guy is another symbol",
+                  exchange    = "DEx")
+
+
+# 3) Create the BrainyChart
+brainy_chart = BrainyChart(symbols_list=[symbol_1, symbol_2])
+brainy_chart.imagine()
+
+
+# 4) Open browser and navigate to the generated server: http://localhost:8000
+```
+
+Switch symbols from the widget’s native UI.
+
+### 3. Attach custom series (overlay + pane)
+
+```python
+import pandas as pd
+from brainy_charts import Symbol, ChartWidget, BrainyChart
+
+
+# 1) Prepare OHLCV DataFrame (timestamp in ms). The df has extra columns 'series_1', 'series_2', 'series_3'.
+df_1 = pd.read_csv("./candle_data/CryBB.csv")
+
+
+# 2) Define the symbol with the DataFrame, and pass the column names you want to see in the chart
+symbol_1 = Symbol(tohlcv_df     = df_1,
+                  ticker        = "CBB",
+                  name          = "CryBB",
+                  description   = "Babies Cry",
+                  exchange      = "DEx",
+                  series_column = ['series_1', 'series_3'],
+                  series_panel  = ['overlay', 'pane'])
+
+
+# 3) Create the BrainyChart
+brainy_chart = BrainyChart(symbols_list=[symbol_1])
+brainy_chart.imagine()
+
+
+# 4) Open browser and navigate to the generated server: http://localhost:8000
+```
+
+The custom series become selectable in the UI (overlay vs. an auxiliary pane).
+
+### 4. Create a trend line programmatically while runtime
+
+```python
+import pandas as pd
+from brainy_charts import Symbol, ChartWidget, BrainyChart
+
+
+# 1) Prepare OHLCV DataFrame (timestamp in ms)
+df_1 = pd.read_csv("./candle_data/CardGlass.csv")
+df_2 = pd.read_csv("./candle_data/RageGuy.csv")
+
+
+# 2) Define the symbol with the DataFrame
+symbol_1 = Symbol(tohlcv_df   = df_1,
+                  ticker      = "CGSS",
+                  name        = "CardGlass",
+                  description = "CardGlass is a symbol",
+                  exchange    = "DEx")
+
+symbol_2 = Symbol(tohlcv_df   = df_2,
+                  ticker      = "RGG",
+                  name        = "Rage Guy",
+                  description = "Rage Guy is another symbol",
+                  exchange    = "DEx")
+
+
+# 3) Create the BrainyChart
+brainy_chart = BrainyChart(symbols_list=[symbol_1, symbol_2])
+brainy_chart.imagine()
+
+
+# 4) Open browser and navigate to the generated server: http://localhost:8000
+
+
+# 5) Make shapes
+from brainy_charts.shape import Shapes, ShapeType, ShapePoint, TrendlineOverrides
+
+shaper_1 = Shapes(symbol_1)
+shape    = ShapeType.trend_line
+points   = [ShapePoint.priced(1757332740000, 0.282), ShapePoint.priced(1757331660000, 0.294)]
+ovr      = TrendlineOverrides(linecolor="#10b981", linewidth=5, show_angle=True)
+
+shaper_1.create(shape, points, ovr)
+```
+
+### 5. Listing and Removing all shapes on a symbol
+
+```python
+import pandas as pd
+from brainy_charts import Symbol, ChartWidget, BrainyChart
+
+
+# 1) Prepare OHLCV DataFrame (timestamp in ms)
+df_1 = pd.read_csv("./candle_data/CardGlass.csv")
+df_2 = pd.read_csv("./candle_data/RageGuy.csv")
+
+
+# 2) Define the symbol with the DataFrame
+symbol_1 = Symbol(tohlcv_df   = df_1,
+                  ticker      = "CGSS",
+                  name        = "CardGlass",
+                  description = "CardGlass is a symbol",
+                  exchange    = "DEx")
+
+symbol_2 = Symbol(tohlcv_df   = df_2,
+                  ticker      = "RGG",
+                  name        = "Rage Guy",
+                  description = "Rage Guy is another symbol",
+                  exchange    = "DEx")
+
+
+# 3) Create the BrainyChart
+brainy_chart = BrainyChart(symbols_list=[symbol_1, symbol_2])
+brainy_chart.imagine()
+
+
+# 4) Open browser and navigate to the generated server: http://localhost:8000
+
+
+# 5) Make shapes
+from brainy_charts.shape import Shapes, ShapeType, ShapePoint, TrendlineOverrides
+
+shaper_1 = Shapes(symbol_1)
+shape    = ShapeType.trend_line
+points   = [ShapePoint.priced(1757332740000, 0.282), ShapePoint.priced(1757331660000, 0.294)]
+ovr      = TrendlineOverrides(linecolor="#10b981", linewidth=5, show_angle=True)
+
+shaper_1.create(shape, points, ovr)
+
+
+# 6) You can remove a specific shape, or just remove them all
+shaper_1.all()                  # Lists all the shapes
+# shaper_1.remove(shape_id=5)
+# shaper_1.remove_all()
+```
+
+---
+
+## 🤝 Contributing
+
+I only onboard collaborators after a short discussion to align expectations.
+
+Just ping me, and we will have a friendly chat and plan for the project.
+
+---
+
+## 📧 Contact Information
+
+[![EMail](https://img.shields.io/badge/EMail-white)](mailto:MostafaRoohy@protonmail.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-blue)](https://linkedin.com/in/mostafaroohy)
+[![Telegram](https://img.shields.io/badge/Telegram-skyblue)](https://telegram.me/MostafaRoohy)
+[![Telegram Channel](https://img.shields.io/badge/BrainyAlgo-lightblue)](https://telegram.me/BrainyAlgo)  
+
+---
+
+## ❤️ Donations
+
+If you rely on BrainyCharts in production or research, sponsoring helps prioritize maintenance and new features.
+
+Or if you would like to support this project, you can donate using the following methods:
+
+- **GitHub Sponsors**: [MostafaRoohy](https://github.com/sponsors/MostafaRoohy)
+- **Monero (XMR)**: `85VxJ4mu4K8eRx7nsM6AdAh9RCELooXsFfy5NfSWKSvjaHF8w9heKDAaLHT2L2bWGZPayb2uiKG7cNZHt3vWHL1e5GC5gJs`
+- **Bitcoin (BTC)**: `bc1qpzzdzds3mj93v3gp8y943yj4gcmasyhznf27ae`
+- **USDT (BEP20)**: `0xb7A2695c5277d632660a8Bd93c6a0edCeBE283B7`
+- **Solana (SOL)**: `B5anfZmQjBNUhR2kYJMQMfxEVQ7b5NAy1kGL9eoKeKw1`
+- **Ton (TON)**: `UQD9wEyrAxrTcpFRi9xQwb1U0gDjnXjbW8xu9veBIWfR2njS`
+- **Ethereum (ETH)**: `0xb7A2695c5277d632660a8Bd93c6a0edCeBE283B7`
+- **Litecoin (LTC)**: `ltc1qx4dz04x3ptt6mxc0q9fg3vjqt2kyvkzrcwqq4d`
+
+Thank you for your support!
+
+---
+
+## 💡 Features
+
+* UDF‑compatible FastAPI backend: `/config`, `/search`, `/symbols`, `/history`, `/time`.
+* Register local symbols from a Pandas DataFrame; auto‑writes `runtime/datafeed/<TICKER>.csv` and `registry.json`.
+* Widget generator writes `runtime/widget/index.html` pointing to your local datafeed.
+* Shapes runtime API with typed points and per‑tool overrides.
+* Multi‑series support per symbol (overlay or separate pane) via `series_column`, `series_color`, `series_panel`.
+* Self‑contained; TradingView’s library is vendored under `charting_library/`.
+
+---
+
+## 🎯 Future Version RoadMap
 
 My roadmap for developing this project is as follows.
 
-I have developed the very zero version that "works". It can plot your dataframe.
-
-Next, we will have two major versions:
 
 <details>
-<summary>1️⃣ Version 1 RoadMap</summary>
+<summary>1️⃣ Version 1 RoadMap (Current)</summary>
 
 1) **✅ Chart Widget**
 
@@ -200,19 +497,24 @@ Next, we will have two major versions:
 
 </details>
 
------------------------------------------------------------------------------------------------------------------------------------------------------
+---
 
-## 🤝 Contributing
+## 🔑 License
 
-I welcome your ideas!  
-ping me!  
+**MIT** — see `LICENSE`.
 
-[![EMail](https://img.shields.io/badge/EMail-white)](mailto:MostafaRoohy@protonmail.com)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-blue)](https://linkedin.com/in/mostafaroohy)
-[![Telegram](https://img.shields.io/badge/Telegram-skyblue)](https://telegram.me/MostafaRoohy)
-[![Telegram Channel](https://img.shields.io/badge/BrainyAlgo-lightblue)](https://telegram.me/BrainyAlgo)  
+---
 
------------------------------------------------------------------------------------------------------------------------------------------------------
+## ❓ FAQ
 
-##
-Star ⭐ the repo if this saves you hours of work!
+* **How should my df be?**
+
+  Your df must include `timestamp`, `open`, `high`, `low`, `close`, `volume` columns. And the `timestamp` column must be in milliseconds (I will flex it later).
+
+* **Does shapes API accept ms or s?**
+
+  Both. Timestamps are normalized; ms are auto‑converted to seconds for drawings.
+
+* **Where are runtime artifacts?**
+
+  Under `runtime/database/` and `runtime/datafeed/` and `runtime/widget/`.
