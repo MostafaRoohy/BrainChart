@@ -114,11 +114,11 @@ class BrainyChart:
             package_dir = Path(__file__).parent
             root_dir    = package_dir.parent
 
-            module_path = "brainy_charts.fast_api:app"
+            module_path = "brainycharts.fast_api:app"
 
             cmd = ["uvicorn", module_path, "--host", "0.0.0.0", "--port", str(self.server_port)]
 
-            # Ensure the project root is on PYTHONPATH so 'brainy_charts.*' imports work
+            # Ensure the project root is on PYTHONPATH so 'brainycharts.*' imports work
             env = os.environ.copy()
             env["PYTHONPATH"] = str(root_dir) + (os.pathsep + env.get("PYTHONPATH",""))
             

@@ -19,7 +19,7 @@ This package exposes a small, stable surface:
 #
 __version__ = "0.9.3"
 
-# `from brainy_charts import *` exposes
+# `from brainycharts import *` exposes
 __all__ = [
     "BrainyChart",
     "Symbol",
