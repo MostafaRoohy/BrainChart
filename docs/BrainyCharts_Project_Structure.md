@@ -6,7 +6,7 @@
 <summary>Main Structure</summary>
 
 - **BrainyCharts/**
-  - **`brainy_charts/`**: The core package for the BrainyCharts application, containing all the logic for data handling, server management, and chart rendering.
+  - **`brainycharts/`**: The core package for the BrainyCharts application, containing all the logic for data handling, server management, and chart rendering.
   - **`charting_library/`**: Contains the TradingView's advanced charts Library, which is like a 'black box' for us.
   - **`Docs/`**: Project documentations.
   - **`env/`**: Environment-related files, such as conda environment configurations and pip requirements.
@@ -22,12 +22,12 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 
 <details>
-<summary>brainy_charts/</summary>
+<summary>brainycharts/</summary>
 
 ```bash
-    brainy_charts/                                 # The core package for the BrainyCharts application, containing all the logic for data handling, server management, and chart rendering.
+    brainycharts/                                 # The core package for the BrainyCharts application, containing all the logic for data handling, server management, and chart rendering.
     │
-    ├── __init__.py                                # Marks the `brainy_charts` directory as a Python package, allowing its modules to be imported.
+    ├── __init__.py                                # Marks the `brainycharts` directory as a Python package, allowing its modules to be imported.
     │
     ├── brainy.py                                  # The main user-facing module. It contains the `BrainyChart` class, which is the primary entry point for creating and managing charts. This class handles data processing, starts the backend server, and provides methods for interacting with the chart's features, such as drawing shapes.
     │

@@ -21,7 +21,7 @@ You keep full control in Python; the library handles the ACL plumbing.
 
 ## 🤔 Why I created this
 
-Using TradingView’s [Advanced Charting Library](www.tradingview.com/charting-library-docs/) from Python usually means writing a custom datafeed, serving files, and glueing JS <> Python. This project streamlines that:
+Using TradingView’s [Advanced Charting Library](https://www.tradingview.com/charting-library-docs/) from Python usually means writing a custom datafeed, serving files, and glueing JS <> Python. This project streamlines that:
 
 * Register symbols from a Pandas DataFrame.
 * Serve data via a ready-made UDF backend.
@@ -52,7 +52,7 @@ conda activate brainycharts
 pip install -r env/requirements.txt
 ```
 
-> Note: The project is not yet packaged. Import from the repo root (so `import brainy_charts` works) or add the repo to `PYTHONPATH`.
+> Note: The project is not yet packaged. Import from the repo root (so `import brainycharts` works) or add the repo to `PYTHONPATH`.
 
 ---
 
@@ -80,7 +80,7 @@ All exampled csv files exist in `playground/candle_data/`.
 ```python
 import time
 import pandas as pd
-from brainy_charts import Symbol, ChartWidget, BrainyChart
+from brainycharts import Symbol, ChartWidget, BrainyChart
 
 
 # 1) Prepare OHLCV DataFrame (timestamp in ms)
@@ -111,7 +111,7 @@ brainy_chart.imagine()
 
 ```python
 import pandas as pd
-from brainy_charts import Symbol, ChartWidget, BrainyChart
+from brainycharts import Symbol, ChartWidget, BrainyChart
 
 
 # 1) Prepare OHLCV DataFrame (timestamp in ms)
@@ -147,7 +147,7 @@ Switch symbols from the widget’s native UI.
 
 ```python
 import pandas as pd
-from brainy_charts import Symbol, ChartWidget, BrainyChart
+from brainycharts import Symbol, ChartWidget, BrainyChart
 
 
 # 1) Prepare OHLCV DataFrame (timestamp in ms). The df has extra columns 'series_1', 'series_2', 'series_3'.
@@ -178,7 +178,7 @@ The custom series become selectable in the UI (overlay vs. an auxiliary pane).
 
 ```python
 import pandas as pd
-from brainy_charts import Symbol, ChartWidget, BrainyChart
+from brainycharts import Symbol, ChartWidget, BrainyChart
 
 
 # 1) Prepare OHLCV DataFrame (timestamp in ms)
@@ -209,7 +209,7 @@ brainy_chart.imagine()
 
 
 # 5) Make shapes
-from brainy_charts.shape import Shapes, ShapeType, ShapePoint, TrendlineOverrides
+from brainycharts.shape import Shapes, ShapeType, ShapePoint, TrendlineOverrides
 
 shaper_1 = Shapes(symbol_1)
 shape    = ShapeType.trend_line
@@ -223,7 +223,7 @@ shaper_1.create(shape, points, ovr)
 
 ```python
 import pandas as pd
-from brainy_charts import Symbol, ChartWidget, BrainyChart
+from brainycharts import Symbol, ChartWidget, BrainyChart
 
 
 # 1) Prepare OHLCV DataFrame (timestamp in ms)
@@ -254,7 +254,7 @@ brainy_chart.imagine()
 
 
 # 5) Make shapes
-from brainy_charts.shape import Shapes, ShapeType, ShapePoint, TrendlineOverrides
+from brainycharts.shape import Shapes, ShapeType, ShapePoint, TrendlineOverrides
 
 shaper_1 = Shapes(symbol_1)
 shape    = ShapeType.trend_line
