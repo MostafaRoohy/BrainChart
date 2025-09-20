@@ -24,24 +24,44 @@ from .symbol import Symbol
 #
 class OnePointShape(str, Enum):
 
-    emoji            = "emoji"
-    text             = "text"
-    icon             = "icon"
-    anchored_text    = "anchored_text"
-    anchored_note    = "anchored_note"
-    note             = "note"
-    sticker          = "sticker"
-    arrow_up         = "arrow_up"
-    arrow_down       = "arrow_down"
-    flag             = "flag"
+    # long_position    = "long_position"
+    # short_position   = "short_position"
+
     vertical_line    = "vertical_line"
     horizontal_line  = "horizontal_line"
-    long_position    = "long_position"
-    short_position   = "short_position"
+
+    arrow_up         = "arrow_up"
+    arrow_down       = "arrow_down"
+
+    text             = "text"
+    note             = "note"
+    anchored_text    = "anchored_text"
+    anchored_note    = "anchored_note"
+
+    icon             = "icon"
+    flag             = "flag"
+    emoji            = "emoji"
+    sticker          = "sticker"
 #
 
 class MultiPointShape(str, Enum):
 
+    long_position             = "long_position"
+    short_position            = "short_position"
+
+    horizontal_ray            = "horizontal_ray"
+    rectangle                 = "rectangle"
+    arrow                     = "arrow"
+    ray                       = "ray"
+    trend_line                = "trend_line"
+    cross_line                = "cross_line"
+    parallel_channel          = "parallel_channel"
+
+    date_and_price_range      = "date_and_price_range"
+    date_range                = "date_range"
+    price_range               = "price_range"
+
+    fixed_range_volume_profile= "fixed_range_volume_profile"
     triangle                  = "triangle"
     curve                     = "curve"
     table                     = "table"
@@ -56,14 +76,8 @@ class MultiPointShape(str, Enum):
     price_label               = "price_label"
     price_note                = "price_note"
     arrow_marker              = "arrow_marker"
-    cross_line                = "cross_line"
-    horizontal_ray            = "horizontal_ray"
-    trend_line                = "trend_line"
     info_line                 = "info_line"
     trend_angle               = "trend_angle"
-    arrow                     = "arrow"
-    ray                       = "ray"
-    parallel_channel          = "parallel_channel"
     disjoint_angle            = "disjoint_angle"
     flat_bottom               = "flat_bottom"
     anchored_vwap             = "anchored_vwap"
@@ -105,18 +119,13 @@ class MultiPointShape(str, Enum):
     time_cycles               = "time_cycles"
     sine_line                 = "sine_line"
     forecast                  = "forecast"
-    date_range                = "date_range"
-    price_range               = "price_range"
-    date_and_price_range      = "date_and_price_range"
     bars_pattern              = "bars_pattern"
     ghost_feed                = "ghost_feed"
     projection                = "projection"
-    rectangle                 = "rectangle"
     rotated_rectangle         = "rotated_rectangle"
     brush                     = "brush"
     highlighter               = "highlighter"
     regression_trend          = "regression_trend"
-    fixed_range_volume_profile= "fixed_range_volume_profile"
 #
 
 class ShapeType(str, Enum):
@@ -221,6 +230,9 @@ _MULTI = {e.value for e in MultiPointShape}
 _MIN_POINTS: Dict[str, int] = {
     
     # Minimal points expected for a subset of shapes (others default to 2)
+
+    "long_position"            : 2,
+    "short_position"           : 2,
 
     "parallel_channel"         : 3,
     "pitchfork"                : 3,
@@ -1022,23 +1034,18 @@ def CreateShape(symbol:Symbol|str, shape_type:ShapeType, points:Union[ShapePoint
     shape_value = _shape_value(shape_type)
     pts         = _normalize_points(points)
 
-    # enforce point count for 1pt vs multipoint
+    # enforce point count
     need = _required_points(shape_value)
+    if (len(pts) != need):
 
-    if (_is_one_point(shape_value) and len(pts) != 1):
-
-        raise ShapeError(f"{shape_value}: expected exactly 1 point, got {len(pts)}")
-    #
-    if (not _is_one_point(shape_value) and len(pts) < need):
-
-        raise ShapeError(f"{shape_value}: need at least {need} point(s), got {len(pts)}")
+        raise ShapeError(f"{shape_value}: need {need} point(s), got {len(pts)}")
     #
 
     payload = {
-        "symbol"    : _symbol_str(symbol),
-        "shape_type": shape_value,
-        "points"    : pts,
-        "options"   : _options_to_dict(options, shape_value),
+        "symbol"     : _symbol_str(symbol),
+        "shape_type" : shape_value,
+        "points"     : pts,
+        "options"    : _options_to_dict(options, shape_value),
     }
 
 
