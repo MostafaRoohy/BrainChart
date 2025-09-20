@@ -94,8 +94,9 @@ class ShapeAPIResponse(BaseModel):
 ################################################################################################### Routes
 #
 router = APIRouter()
-
-
+#
+################################################# General Routes
+#
 def load_registry() -> dict:
 
     registry_path = DATAFEED_DIR / "registry.json"
@@ -111,19 +112,6 @@ def load_registry() -> dict:
     #
 #
 
-def load_ticker_metadata(ticker:str) -> dict:
-
-    registry = load_registry()
-    meta     = registry.get(ticker)
-
-    if (not meta):
-
-        raise HTTPException(404, detail=f"Ticker '{ticker}' not found in registry")
-    #
-
-    return (meta)
-#
-
 def load_ticker_history_csv(ticker:str) -> pd.DataFrame:
 
     csv_path = DATAFEED_DIR / f"{ticker}.csv"
@@ -135,15 +123,8 @@ def load_ticker_history_csv(ticker:str) -> pd.DataFrame:
 
     return (pd.read_csv(csv_path))
 #
-
-def parse_series_symbol(raw:str) -> tuple[str, str]|None:
-
-    SERIES_SEP = "#SERIES:"
-    return (raw.split(SERIES_SEP, 1) if raw and SERIES_SEP in raw else None)
+################################################# Chart Routes
 #
-
-
-
 @router.get("/config")
 async def get_config():
 
@@ -261,8 +242,147 @@ async def search_symbols(query:str="", type:Optional[str]=None, exchange:Optiona
 
     return (matches)
 #
+################################################# Symbol Routes
+#
+def load_ticker_metadata(ticker:str) -> dict:
 
+    registry = load_registry()
+    meta     = registry.get(ticker)
 
+    if (not meta):
+
+        raise HTTPException(404, detail=f"Ticker '{ticker}' not found in registry")
+    #
+
+    return (meta)
+#
+
+def parse_series_symbol(raw:str) -> tuple[str, str]|None:
+
+    SERIES_SEP = "#SERIES:"
+    return (raw.split(SERIES_SEP, 1) if raw and SERIES_SEP in raw else None)
+#
+
+def _parse_resolution(res:str) -> tuple[str, int]:
+
+    """
+    Return (kind, n) where kind in {'sec','min','day','week','month'} and n is the multiplier.
+    '15' -> ('min', 15), '60' -> ('min', 60), '1S' -> ('sec', 1), '1D' -> ('day', 1),
+    '1W' -> ('week', 1), '1M' -> ('month', 1)
+    """
+
+    r = str(res or "").strip().upper()
+
+    if (r.endswith("S")):
+
+        return ("sec", int(r[:-1] or "1"))
+    #
+    if (r.endswith("D")):
+
+        return ("day", int(r[:-1] or "1"))
+    #
+    if (r.endswith("W")):
+
+        return ("week", int(r[:-1] or "1"))
+    #
+    if (r.endswith("M")):
+
+        return ("month", int(r[:-1] or "1"))
+    #
+
+    return ("min", int(r or "1"))
+#
+
+def _agg_ohlcv(df:pd.DataFrame, kind:str, n:int) -> pd.DataFrame:
+
+    """
+    Aggregate OHLCV to the requested bucket.
+    Expects df with 'timestamp' (ms), 'open','high','low','close','volume'.
+    Returns the same columns, with 'timestamp' aligned to bucket start (ms).
+    """
+
+    if (df.empty):
+
+        return df
+    #
+
+    if (kind in ("sec", "min")):
+
+        bucket_ms = (n * 1000) if kind == "sec" else (n * 60_000)
+        gb        = (df["timestamp"] // bucket_ms) * bucket_ms
+        out       = (df.assign(_b=gb)
+                       .groupby("_b", as_index=False)
+                       .agg({
+                            "open": "first",
+                            "high": "max",
+                            "low":  "min",
+                            "close":"last",
+                            "volume":"sum"
+                        })
+                    )
+        
+        out = out.rename(columns={"_b": "timestamp"})
+
+        return (out.dropna())
+    #
+
+    rule = {"day":"D", "week":"W-MON", "month":"M"}[kind]
+    ts   = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
+    out  = (df.assign(_ts=ts).set_index("_ts")
+              .resample(rule, label="left", closed="left", origin="epoch")
+              .agg({
+                  "open": "first",
+                  "high": "max",
+                  "low":  "min",
+                  "close":"last",
+                  "volume":"sum"
+               })
+             .dropna()
+             .reset_index()
+          )
+    
+    out["timestamp"] = (out["_ts"].astype("int64") // 10**6)
+
+    return (out.drop(columns=["_ts"]))
+#
+
+def _agg_series(x:pd.DataFrame, col:str, kind:str, n:int) -> pd.DataFrame:
+
+    """
+    Aggregate a single numeric series to requested bucket (use last value per bucket).
+    Expects x with 'timestamp' (ms) and the 'col'.
+    """
+
+    if x.empty:
+
+        return x[["timestamp", col]]
+    #
+
+    if kind in ("sec", "min"):
+
+        bucket_ms = (n * 1000) if kind == "sec" else (n * 60_000)
+        gb        = (x["timestamp"] // bucket_ms) * bucket_ms
+        y         = (x.assign(_b=gb)
+                       .groupby("_b", as_index=False)[col]
+                       .last()
+                    )
+        
+        return (y.rename(columns={"_b": "timestamp"}).dropna())
+    #
+
+    rule = {"day":"D", "week":"W-MON", "month":"M"}[kind]
+    ts   = pd.to_datetime(x["timestamp"], unit="ms", utc=True)
+    y   = (x.assign(_ts=ts).set_index("_ts")[col]
+             .resample(rule, label="left", closed="left", origin="epoch")
+             .last()
+             .dropna()
+             .reset_index()
+          )
+    
+    y["timestamp"] = (y["_ts"].astype("int64") // 10**6)
+
+    return (y.drop(columns=["_ts"]))
+#
 
 @router.get("/symbols")
 async def get_symbols(symbol: str):
@@ -310,7 +430,7 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
 
     try:
         
-        if not symbol:
+        if (not symbol):
 
             raise HTTPException(status_code=400, detail="Symbol parameter is required")
         #
@@ -327,7 +447,10 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
                 return JSONResponse(content={"s":"no_data", "nextTime": from_time})
             #
 
-            x = df[["timestamp", col]].copy()
+            x       = df[["timestamp", col]].copy()
+            kind, n = _parse_resolution(resolution)
+            x       = _agg_series(x, col, kind, n)
+
 
             if (resolution == "1D"):
 
@@ -344,6 +467,7 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
 
                 x = x.dropna()
             #
+
 
             if (countback is not None):
 
@@ -377,7 +501,10 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
 
 
         df          = load_ticker_history_csv(symbol)
+        kind, n     = _parse_resolution(resolution)
+        df          = _agg_ohlcv(df, kind, n)
         filtered_df = None
+
         if (from_time > 0 or to_time > 0):
 
             if (resolution == '1D'):
@@ -429,9 +556,8 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
         return JSONResponse(content={"s": "error", "errmsg": str(e)})
     #
 #
-
-
-
+################################################# Shaping Routes
+#
 def _canon(obj):
 
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
