@@ -257,10 +257,11 @@ def load_ticker_metadata(ticker:str) -> dict:
     return (meta)
 #
 
-def parse_series_symbol(raw:str) -> tuple[str, str]|None:
+
+def parse_series_symbol(raw:str) -> tuple[str, str] | None:
 
     SERIES_SEP = "#SERIES:"
-    return (raw.split(SERIES_SEP, 1) if raw and SERIES_SEP in raw else None)
+    return ((tuple(raw.split(SERIES_SEP, 1))) if (SERIES_SEP in raw) else (None))
 #
 
 def _parse_resolution(res:str) -> tuple[str, int]:

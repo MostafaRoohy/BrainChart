@@ -3,12 +3,13 @@
 ###################################################################################################
 ################################################################################################### Modules
 #
-import pandas as pd
-from typing import List, Dict, Optional, Any
-from enum import Enum
 from pathlib import Path
+
+import pandas as pd
 import json
-import os
+
+from typing import List, Dict, Optional, Any, Literal
+from enum import Enum
 #
 ###################################################################################################
 ###################################################################################################
@@ -277,203 +278,6 @@ class Timezone(Enum):
         return (self.__str__())
     #
 #
-
-later_doc_str  = """
-
-
-
-
-
-
-
-
-
-LibrarySymbolInfo
-=================
-Canonical description of a TradingView symbol as consumed by the Charting Library.
-Populate this object from your symbology/metadata source and return it from the
-datafeed's `resolveSymbol`/`searchSymbols` flows.
-
-Parameters
-----------
-
-build_seconds_from_ticks : bool, optional, default=False
-    Allow the library to synthesize **seconds** bars from **tick** data when the required
-    seconds resolution is not directly available from the datafeed.
-    Requirements:
-      - `has_seconds == True`
-      - `has_ticks == True`
-      - `seconds_multipliers` is empty **or** only contains resolutions the datafeed
-        itself provides.
-    Notes:
-      - If the datafeed provides 3S, the library may build 1S/2S from ticks;
-        15S will be built from seconds bars, not ticks.
-
-corrections : str, optional
-    Per-day session overrides in `SESSION:YYYYMMDD` form. Multiple days are separated
-    by `;`. Within `SESSION`, multiple sub-sessions are comma-separated.
-    Example for two days:
-      "1900F4-2350F4,1000-1845:20181113;1000-1400:20181114"
-    Meaning:
-      - 2018-11-13: two sessions; first 19:00 four days before to 23:50 four days before,
-        then 10:00–18:45 same day.
-      - 2018-11-14: single session 10:00–14:00.
-
-currency_code : str, optional
-    Display currency code (Security Info dialog and price axes). May reflect conversion
-    if you enable currency conversion in your stack.
-
-
-data_status : Literal["streaming","endofday","delayed_streaming"], optional
-    Series data status. When `delayed_streaming` or `endofday`, the UI shows a
-    delayed-data indicator (requires `display_data_mode` featureset).
-    If `delayed_streaming`, set `delay` (seconds).
-
-delay : int, optional
-    Delay type/value for data:
-      -  0  → realtime
-      - -1  → end-of-day
-      - >0  → delayed realtime in seconds
-
-
-expiration_date : int, optional
-    Unix timestamp of contract expiration. **Required** when `expired == True`.
-    The library will request data starting at this time.
-
-expired : bool, optional, default=False
-    Whether this symbol is an expired futures contract.
-
-
-
-
-original_currency_code : str, optional
-    Trading currency (original, pre-conversion).
-
-original_unit_id : str, optional
-    Unique id of the trading unit (e.g., base unit for commodities).
-
-price_source_id : str, optional
-    Selected price source id for this symbol; must exist in `price_sources`.
-    Requires `symbol_info_price_source` featureset to show in legend.
-
-price_sources : list[dict], optional
-    Enumerates supported price sources for the series (legend display).
-    Example:
-      [{"id": "1", "name": "Spot Price"}, {"id": "321", "name": "Bid"}]
-
-
-
-
-session : str
-    Trading hours in exchange timezone (Olson/IANA). See Trading Sessions.
-    Example: "1700-0200".
-
-session_display : str, optional
-    Human-friendly session string shown in UI. Falls back to `session` if omitted.
-
-session_holidays : str, optional
-    Comma-separated YYYYMMDD non-trading dates (not shown on chart).
-    Example: "20181105,20181107,20181112".
-    Use `corrections` for nuanced holiday sessions.
-
-subsession_id : str, optional
-    Identifier of the currently displayed subsession (must exist in `subsessions`).
-
-subsessions : list[dict], optional
-    Metadata for subsessions within extended sessions. See Extended Sessions.
-
-
-
-
-timezone : str
-    Exchange timezone in Olson/IANA form (e.g., "America/New_York").
-
-
-
-unit_conversion_types : list[str], optional
-    Allowed unit conversion group names for this instrument.
-
-unit_id : str, optional
-    Unique unit identifier (or alt id when unit conversion is enabled). Shown on axes.
-
-
-
-
-
-Cross-field rules & quick reference
-----------------------------------
-Resolution enablement:
-  • Seconds  → `has_seconds=True` and `seconds_multipliers`.
-  • Minutes  → `has_intraday=True` and `intraday_multipliers`.
-  • Daily    → `has_daily=True` and `daily_multipliers`.
-  • Weekly   → `has_weekly_and_monthly=True` and `weekly_multipliers`.
-  • Monthly  → `has_weekly_and_monthly=True` and `monthly_multipliers`.
-
-Building/synthesis:
-  • Higher daily/weekly/monthly can be built from the respective *_multipliers lists.
-  • Weekly/Monthly may be built from Daily when `has_weekly_and_monthly=False`
-    (costly; may fail).
-  • Seconds from ticks only when `build_seconds_from_ticks=True` and prerequisites met.
-
-Pricing format interplay:
-  • Decimal pricing  → set `format="price"`, `fractional=False`,
-                       choose `minmov` and `pricescale=10**n`.
-  • Fractional       → set `fractional=True`, `pricescale=2**n`,
-                       `minmov` as numerator unit; optionally `minmove2>0` for xx'yy'zz.
-  • Variable ticks   → omit `fractional`, specify `variable_tick_size`.
-
-Examples
---------
-Minimal stock:
-  {
-    "name": "AAPL",
-    "ticker": "NASDAQ:AAPL",
-    "description": "Apple Inc.",
-    "exchange": "NASDAQ",
-    "listed_exchange": "NASDAQ",
-    "type": "stock",
-    "timezone": "America/New_York",
-    "session": "0930-1600",
-    "format": "price",
-    "minmov": 1,
-    "pricescale": 100,
-    "has_daily": True,
-    "daily_multipliers": ["1"],
-    "has_intraday": True,
-    "intraday_multipliers": ["1","5","15","60"],
-    "visible_plots_set": "ohlcv",
-    "volume_precision": 0
-  }
-
-Fractional futures (1/4 of 1/32):
-  {
-    "name": "ZB",
-    "type": "futures",
-    "timezone": "America/Chicago",
-    "session": "1700-1600",
-    "format": "price",
-    "fractional": True,
-    "minmov": 1,
-    "pricescale": 128,
-    "minmove2": 4
-  }
-
-Seconds synthesized from ticks:
-  {
-    "name": "BTCUSD",
-    "type": "crypto",
-    "timezone": "Etc/UTC",
-    "session": "0000-0000",
-    "format": "price",
-    "minmov": 1,
-    "pricescale": 100,
-    "has_ticks": True,
-    "has_seconds": True,
-    "seconds_multipliers": [],   # datafeed provides no explicit seconds
-    "build_seconds_from_ticks": True
-  }
-"""
-#
 ###################################################################################################
 ###################################################################################################
 ################################################################################################### Symbol
@@ -712,9 +516,14 @@ class Symbol:
             ################################################################################################## Urgent
             #
             tohlcv_df                : pd.DataFrame                      = pd.DataFrame(),
-            series_column            : list[str]                         = None,
-            series_color             : list[str]                         = None,
-            series_panel             : list[str]                         = None,
+            series_columns           : list[str]                         = None,
+            series_colors            : list[str]                         = None,
+            series_panels            : list[Literal['panel', 'overlay']] = None,
+            series_styles            : list[Literal['line','columns',
+                                                    'histogram','area',
+                                                    'step']] | None      = None,
+            series_widths            : list[float]                       = None,
+            
             ticker                   : str                               = "TICKER",
             name                     : str                               = "Name",
             base_name                : Optional[List[str]]               = None,
@@ -752,7 +561,7 @@ class Symbol:
             has_weekly_and_monthly   : Optional[bool]                    = False,
             has_empty_bars           : Optional[bool]                    = False,
             build_seconds_from_ticks : Optional[bool]                    = False,
-            supported_resolutions    : Optional[list[ResolutionString]]  = ["1S", "5S", "1", "5", "15", "30", "60", "D", "W"],
+            supported_resolutions    : Optional[list[ResolutionString]]  = ["1S", "5S", "1", "3", "5", "15", "30", "60", "240", "D", "W"],
             intraday_multipliers     : Optional[List[str]]               = None,
             seconds_multipliers      : Optional[List[str]]               = ["1", "2", "3", "4", "5", "10", "15", "20", "30", "40"],
             daily_multipliers        : Optional[List[str]]               = ["1"],
@@ -809,71 +618,81 @@ class Symbol:
         #
 
 
-        self.tohlcv_df              = tohlcv_df
-        self.series_column          = series_column
-        self.series_color           = series_color
-        self.series_panel           = series_panel
+        self.tohlcv_df                = tohlcv_df
+        self.series_columns           = series_columns
+        self.series_colors            = series_colors
+        self.series_panels            = series_panels
+        self.series_styles            = series_styles
+        self.series_widths            = series_widths
 
-        self.ticker                 = (ticker)  if  (ticker!="TICKER")  else  (f"TICKER_{len(Symbol._tickers)}")
-        self.name                   = name
-        self.base_name              = base_name
-        self.library_custom_fields  = library_custom_fields
+        self.ticker                   = (ticker)  if  (ticker!="TICKER")  else  (f"TICKER_{len(Symbol._tickers)}")
+        self.name                     = name
+        self.base_name                = base_name
+        self.library_custom_fields    = library_custom_fields
 
-        self.description            = description
-        self.long_description       = long_description
-        self.type                   = str(type)
-        self.exchange               = exchange
-        self.listed_exchange        = listed_exchange
-        self.sector                 = sector
-        self.industry               = industry
-        self.logo_urls              = logo_urls
-        self.exchange_logo          = exchange_logo
+        self.description              = description
+        self.long_description         = long_description
+        self.type                     = str(type)
+        self.exchange                 = exchange
+        self.listed_exchange          = listed_exchange
+        self.sector                   = sector
+        self.industry                 = industry
+        self.logo_urls                = logo_urls
+        self.exchange_logo            = exchange_logo
 
-        self.format                 = str(format)
-        self.pricescale             = pricescale
-        self.minmov                 = minmov
-        self.minmove2               = minmove2
-        self.fractional             = fractional
-        self.variable_tick_size     = variable_tick_size
-        self.visible_plots_set      = visible_plots_set
-        self.volume_precision       = volume_precision
+        self.format                   = str(format)
+        self.pricescale               = pricescale
+        self.minmov                   = minmov
+        self.minmove2                 = minmove2
+        self.fractional               = fractional
+        self.variable_tick_size       = variable_tick_size
+        self.visible_plots_set        = visible_plots_set
+        self.volume_precision         = volume_precision
 
-        self.has_daily              = has_daily
-        self.has_intraday           = has_intraday
-        self.has_seconds            = has_seconds
-        self.has_ticks              = has_ticks
-        self.has_weekly_and_monthly = has_weekly_and_monthly
-        self.has_empty_bars         = has_empty_bars
-        self.has_empty_bars         = build_seconds_from_ticks
-        self.supported_resolutions  = supported_resolutions
-        self.intraday_multipliers   = intraday_multipliers
-        self.seconds_multipliers    = seconds_multipliers
-        self.daily_multipliers      = daily_multipliers
-        self.weekly_multipliers     = weekly_multipliers
-        self.monthly_multipliers    = monthly_multipliers
+        self.has_daily                = has_daily
+        self.has_intraday             = has_intraday
+        self.has_seconds              = has_seconds
+        self.has_ticks                = has_ticks
+        self.has_weekly_and_monthly   = has_weekly_and_monthly
+        self.has_empty_bars           = has_empty_bars
+        self.build_seconds_from_ticks = build_seconds_from_ticks
+        self.supported_resolutions    = supported_resolutions
+        self.intraday_multipliers     = intraday_multipliers
+        self.seconds_multipliers      = seconds_multipliers
+        self.daily_multipliers        = daily_multipliers
+        self.weekly_multipliers       = weekly_multipliers
+        self.monthly_multipliers      = monthly_multipliers
 
 
-        self.session  = session
-        self.timezone = str(timezone)
+        self.session                  = session
+        self.timezone                 = str(timezone)
+
 
         Symbol._tickers.append(self.ticker)
     #
 
-    def _normalize_series_specs(self, default_color:str="#22c55e", default_panel:str ="pane") -> list[dict]:
+    def _normalize_series_specs(self,
+                                default_color:str="#22c55e", default_panel:str="pane", default_style:str="line", default_width:int=1) -> list[dict]:
         
-        cols   = self.series_column or []
-        colors = self.series_color  or []
-        panels = self.series_panel  or []
-        out    = []
+        columns = self.series_columns or []
+        colors  = self.series_colors  or []
+        panels  = self.series_panels  or []
+        styles  = self.series_styles  or []
+        widths  = self.series_widths  or []
 
-        for i, col in enumerate(cols):
+        out     = []
 
-            color = colors[i] if i < len(colors) and colors[i] else default_color
-            pane  = panels[i] if i < len(panels) and panels[i] else default_panel
-            out.append({"col": col, "color": color, "panel": pane})
+        for i, col in enumerate(columns):
+
+            color = (colors[i]) if (i < len(colors) and colors[i]) else (default_color)
+            panel = (panels[i]) if (i < len(panels) and panels[i]) else (default_panel)
+            style = (styles[i]) if (i < len(styles) and styles[i]) else (default_style)
+            width = (widths[i]) if (i < len(widths) and widths[i]) else (default_width)
+
+            out.append({"col":col, "color":color, "panel":panel, "style":style, "width":width})
         #
 
-        return out
+        return (out)
     #
 
     def _as_dict(self):

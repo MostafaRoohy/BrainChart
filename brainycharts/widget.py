@@ -17,7 +17,7 @@ from .symbol import Symbol
 ###################################################################################################
 ################################################################################################### index.html builder
 #
-index_html_raw = r'''
+raw_index_html                        = r'''
 <!DOCTYPE HTML>
 <html>
 
@@ -35,29 +35,87 @@ index_html_raw = r'''
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
+            {javascript_function_getParameterByName}
+
+            {javascript_window_addEventListener}
+            //
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            {JAVASCRIPT_FUNCTION_INITONREADY}
+            //
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+        </script>
+
+    </head>
+
+    <body style="margin:0px;">
+
+        <div id="tv_chart_container"></div>
+
+    </body>
+
+</html>
+'''
+#
+
+javascript_function_getParameterByName = r'''
             function getParameterByName(name) 
-            {{
+            {
                 name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
                 var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
                     results = regex.exec(location.search);
                 return results === null ? ""        : decodeURIComponent(results[1].replace(/\+/g, " "));
-            }}
-            //
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            function initOnReady() 
-            {{
-                var datafeedUrl   = window.location.origin;
-                var customDataUrl = getParameterByName('dataUrl');
-                if (customDataUrl !== "") 
-                {{
-                    datafeedUrl = customDataUrl.startsWith('https://') ? customDataUrl        : `https://${{customDataUrl}}`;
-                }}
+            }
+'''
+#
+
+javascript_window_addEventListener     = r'''
+            window.addEventListener('DOMContentLoaded', initOnReady, false);
+'''
+#
+#################################################
+#
+javascript_function_initOnReady = r'''
+            function initOnReady() {{
                 //
                 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //
+                {javascript_datafeedUrl}
+                //
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                {javascript_widget_TradingView}
+                //
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                {function_onChartReady}
+                //
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+            }};
+'''
+#
+
+javascript_datafeedUrl          = r'''
+                var datafeedUrl   = window.location.origin;
+                var customDataUrl = getParameterByName('dataUrl');
+                if (customDataUrl !== "") {
+                    datafeedUrl = customDataUrl.startsWith('https://') ? customDataUrl : `https://${customDataUrl}`;
+                }
+'''
+#
+#################################################
+#
+javascript_widget_TradingView = r'''
                 var widget = window.tvWidget = new TradingView.widget(
                 {{
                     {debug}
@@ -81,200 +139,306 @@ index_html_raw = r'''
 
                     {custom_indicators_getter}
                 }});
-                //
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                //
-                widget.onChartReady(function () {{
-                    const chart   = widget.activeChart();
+'''
+#
 
-                    // === BrainyCharts: auto-add custom series per brainy_series_list ===
-                    function removeBrainySeriesStudies() {{
-                    const studies = chart.getAllStudies() || [];
-                    for (const s of studies) {{
-                        // Any Compare study pointing to our virtual #SERIES symbols
-                        const desc = (s && (s.description || s.name || "")).toString();
-                        if (desc.includes("#SERIES:")) {{
-                        try {{ chart.removeEntity(s.id); }} catch (_) {{}}
-                        }}
-                    }}
-                    }}
+custom_indicators_getter      = r'''
+                                                function (PineJS) {
+                                                    // Build one indicator definition for a given column name
+                                                    function makeDef(col) {
+                                                        const desc  = `Custom Data: ${col}`;                       // what you'll pass to createStudy
+                                                        const id    = `${desc}@tv-basicstudies-1`;                  // MUST match description + suffix
+                                                        return {
+                                                            name: `brainy_series_${col}`,                           // internal unique name
+                                                            metainfo: {
+                                                                _metainfoVersion: 53,
+                                                                id: id,
+                                                                description: desc,
+                                                                shortDescription: desc,                             // Legend shows this exact text
+                                                                isCustomIndicator: true,
+                                                                is_price_study: false,
+                                                                format: { type: 'price', precision: 6 },
+                                                                plots:   [{ id: 'plot_0', type: 'line' }],
+                                                                styles:  { plot_0: { title: 'Value', histogramBase: 0 } },
+                                                                defaults: {
+                                                                    styles: {
+                                                                        plot_0: {
+                                                                            linestyle: 0,
+                                                                            linewidth: 2,
+                                                                            plottype: 0,
+                                                                            color: '#33AAFF',
+                                                                            trackPrice: false,
+                                                                            visible: true
+                                                                        }
+                                                                    },
+                                                                    inputs: {}
+                                                                },
+                                                                // keep symbol input hidden; you'll pass it via createStudy
+                                                                inputs: [{ id: 'symbol', name: 'Series symbol', type: 'text', defval: '', isHidden: true }]
+                                                            },
+                                                            constructor: function () {
+                                                                this.init = function (context, inputCallback) {
+                                                                    this._context = context;
+                                                                    this._input   = inputCallback;
+                                                                    const sym = this._input(0) || '#MISSING';
+                                                                    this._context.new_sym(sym, PineJS.Std.period(this._context));
+                                                                };
+                                                                this.main = function (context, inputCallback) {
+                                                                    this._context = context;
+                                                                    this._input   = inputCallback;
 
-                    async function addBrainySeriesFromSymbolExt() {{
-                    const ext  = chart.symbolExt && chart.symbolExt();
-                    const list = ext && ext.library_custom_fields && ext.library_custom_fields.brainy_series_list;
-                    if (!Array.isArray(list) || list.length === 0) return;
+                                                                    // main time
+                                                                    this._context.select_sym(0);
+                                                                    const mainTime = this._context.new_var(this._context.symbol.time);
 
-                    removeBrainySeriesStudies();
+                                                                    // child series
+                                                                    this._context.select_sym(1);
+                                                                    const secTime  = this._context.new_var(this._context.symbol.time);
+                                                                    const secClose = this._context.new_var(PineJS.Std.close(this._context));
+                                                                    const aligned  = secClose.adopt(secTime, mainTime, 1);
 
-                    const base = chart.symbol();
-                    for (const spec of list) {{
-                        if (!spec || !spec.col) continue;
+                                                                    this._context.select_sym(0);
+                                                                    return [aligned];
+                                                                };
+                                                            }
+                                                        };
+                                                    }
 
-                        const childSymbol = `${{base}}#SERIES:${{spec.col}}`;
+                                                    // Discover all column names once at init and register a definition for each.
+                                                    // We read all symbols, then the per-symbol `brainy_series_list` from /symbols.
+                                                    async function discoverColumns() {
+                                                        const cols = new Set();
+                                                        try {
+                                                            const search = await fetch('/search?query=&limit=10000').then(r => r.json());
+                                                            for (const item of (search || [])) {
+                                                                const sym = item && item.symbol;
+                                                                if (!sym) continue;
+                                                                const info = await fetch(`/symbols?symbol=${encodeURIComponent(sym)}`).then(r => r.json());
+                                                                const list = info && info.library_custom_fields && info.library_custom_fields.brainy_series_list;
+                                                                if (Array.isArray(list)) for (const s of list) if (s && s.col) cols.add(String(s.col));
+                                                            }
+                                                        } catch (_) { /* ignore; fallback below */ }
+                                                        // Fallback if nothing was discovered (keeps widget booting)
+                                                        if (cols.size === 0) ['series_1','series_2','series_3'].forEach(x => cols.add(x));
+                                                        return Array.from(cols);
+                                                    }
 
-                        // Build per-indicator overrides (no indicator name in keys)
-                        const overrides = {{}};
-                        // Force a line style so the color key below applies to a line
-                        overrides["style"] = 2; // 2 = line
-                        if (spec.color) overrides["lineStyle.color"] = spec.color;  // <- correct key
+                                                    return discoverColumns().then(arr => arr.map(makeDef));
+                                                }
 
-                        // Create Overlay. If panel === "overlay" it’s merged; otherwise we’ll unmerge below.
-                        const studyId = chart.createStudy(
-                        "Overlay",
-                        spec.panel === "overlay",
-                        false,
-                        {{ symbol: childSymbol }},
-                        overrides
-                        );
-
-                        if (spec.panel === "pane") {{
-                        try {{
-                            const api = chart.getStudyById(studyId);
-                            if (api && api.paneIndex() === 0) api.unmergeDown();
-                        }} catch (e) {{ console.warn("Could not move study to its own pane:", e); }}
-                        }}
-                    }}
-                    }}
+'''
+#
+#################################################
+#
+function_onChartReady = r'''
+                widget.onChartReady(function () {
 
 
-                    // run now and on every symbol change
+                    const chart = widget.activeChart();
+
+                    // --------------------------------------------------------------------------------------------------------------- Custom Series
+
+                    function removeBrainySeriesStudies() {
+                        const studies = (chart.getAllStudies && chart.getAllStudies()) || [];
+                        for (const s of studies) {
+                            const desc = (s && (s.description || s.name || "")).toString().toLowerCase();
+                            // remove old compare-overlays and our custom study
+                            const isVirtual = desc.includes("#series:");
+                            const isBrainy = desc.includes("brainy series");
+                            if (isVirtual || isBrainy) {
+                                try { chart.removeEntity(s.id); } catch (_) { }
+                            }
+                        }
+                    }
+
+                    async function addBrainySeriesFromSymbolExt() {
+                        // Always clear whatever was drawn for the previous symbol
+                        removeBrainySeriesStudies();
+
+                        const ext = chart.symbolExt && chart.symbolExt();
+                        const list = ext && ext.library_custom_fields && ext.library_custom_fields.brainy_series_list;
+                        if (!Array.isArray(list) || list.length === 0) return;
+
+                        const PLOTTYPE = { line: 0, histogram: 1, area: 4, columns: 5, step: 9 };
+
+                        const base = chart.symbol();
+                        for (const spec of list) {
+                            if (!spec || !spec.col) continue;
+
+                            const childSymbol = `${base}#SERIES:${spec.col}`;
+                            const style = (spec.style || 'line').toLowerCase();
+
+                            // Build per-instance overrides for our *custom* study
+                            const ov = {};
+                            // Use the plot *title* (as shown in the indicator UI), lowercased:
+                            const PATH = "value";
+
+                            // style name must be a string here
+                            ov[`${PATH}.plottype`]  = (spec.style || 'line');      // 'line' | 'area' | 'columns' | 'histogram' | 'step'
+                            if (spec.color) ov[`${PATH}.color`]     = spec.color;  // must be #RRGGBB
+                            if (spec.width) ov[`${PATH}.linewidth`] = Number(spec.width);
+
+                            const overlay = (spec.panel || 'overlay') === 'overlay';
+
+                            const studyName = `Custom Data: ${spec.col}`;
+                            const id = chart.createStudy(
+                            studyName,
+                            overlay,
+                            false,
+                            { symbol: childSymbol },
+                            ov
+                            );
+
+                            // optional but fine to keep
+                            try { chart.applyStudyOverrides(id, ov); } catch (_) {}
+
+                            // If user wants a separate pane, unmerge it
+                            if (!overlay) {
+                                try {
+                                    const api = chart.getStudyById && chart.getStudyById(id);
+                                    if (api && api.paneIndex && api.paneIndex() === 0) api.unmergeDown();
+                                } catch (e) { /* no-op */ }
+                            }
+                        }
+                    }
+
+
                     addBrainySeriesFromSymbolExt();
-                    chart.onSymbolChanged().subscribe(null, addBrainySeriesFromSymbolExt);
+                    chart.onSymbolChanged().subscribe(null, () => {
+                        removeBrainySeriesStudies();
+                        addBrainySeriesFromSymbolExt();
+                    });
 
-                    // state
-                    const renderedById        = new Map();  // server shape id -> entityId (number)
-                    const serverIdByEntityId  = new Map();  // entityId (number) -> server shape id
-                    const pendingCreates      = [];         // queue of server IDs that we're about to create
-                    const suppressDbDelete    = new Set();  // entityIds we're removing programmatically (don't DELETE)
-                    const sigById             = new Map();  // server shape id -> last signature
+                    // -----------------------------------------------------------------------------------------------------------------------------
+
+                    // --------------------------------------------------------------------------------------------------------- BrainyCharts: shape
+
+                    const renderedById = new Map();  // server shape id -> entityId (number)
+                    const serverIdByEntityId = new Map();  // entityId (number) -> server shape id
+                    const pendingCreates = [];         // queue of server IDs that we're about to create
+                    const suppressDbDelete = new Set();  // entityIds we're removing programmatically (don't DELETE)
+                    const sigById = new Map();  // server shape id -> last signature
 
 
                     const POLL_MS = 1500;
                     let pollTimer = null;
 
 
-
                     // Map TradingView drawing events <-> DB sync
-                    widget.subscribe('drawing_event', (entityId, type) => 
-                        {{
-                            // 'create' | 'remove' | 'move' | 'hide' | 'show' | 'properties_changed' | 'points_changed'
-                            if (type === 'create') {{
-                                // We created something (programmatically), match it to our queued DB id
-                                const serverId = pendingCreates.shift();
-                                if (serverId != null) {{
+                    widget.subscribe('drawing_event', (entityId, type) => {
+                        // 'create' | 'remove' | 'move' | 'hide' | 'show' | 'properties_changed' | 'points_changed'
+                        if (type === 'create') {
+                            // We created something (programmatically), match it to our queued DB id
+                            const serverId = pendingCreates.shift();
+                            if (serverId != null) {
                                 renderedById.set(serverId, entityId);
                                 serverIdByEntityId.set(entityId, serverId);
-                                }}
-                            }} else if (type === 'remove') {{
-                                // If we initiated the removal ourselves, don't delete from DB
-                                if (suppressDbDelete.has(entityId)) {{
+                            }
+                        } else if (type === 'remove') {
+                            // If we initiated the removal ourselves, don't delete from DB
+                            if (suppressDbDelete.has(entityId)) {
                                 suppressDbDelete.delete(entityId);
                                 const sid = serverIdByEntityId.get(entityId);
-                                if (sid != null) {{
+                                if (sid != null) {
                                     serverIdByEntityId.delete(entityId);
                                     renderedById.delete(sid);
                                     sigById.delete(sid);
-                                }}
+                                }
                                 return;
-                                }}
+                            }
 
-                                // User removed it in the UI -> DELETE from DB
-                                const sid = serverIdByEntityId.get(entityId);
-                                if (sid != null) {{
-                                fetch(`/shapes/${{sid}}`, {{ method: 'DELETE' }})
+                            // User removed it in the UI -> DELETE from DB
+                            const sid = serverIdByEntityId.get(entityId);
+                            if (sid != null) {
+                                fetch(`/shapes/${sid}`, { method: 'DELETE' })
                                     .catch(console.error)
-                                    .finally(() => {{
-                                    serverIdByEntityId.delete(entityId);
-                                    renderedById.delete(sid);
-                                    sigById.delete(sid);
-                                    }});
-                                }}
-                            }}
-                        }}
+                                    .finally(() => {
+                                        serverIdByEntityId.delete(entityId);
+                                        renderedById.delete(sid);
+                                        sigById.delete(sid);
+                                    });
+                            }
+                        }
+                    }
                     );
 
 
-
-
-
-
-
                     // helpers
-                    function toPoints(points) {{
-                        return (points || []).map(p => {{
-                        const q = {{}};
-                        if ('time'  in p) q.time  = Number(p.time);
-                        if ('id'    in p) q.id    = Number(p.id);
-                        if ('price' in p) q.price = Number(p.price);
-                        if ('channel' in p) q.channel = String(p.channel);
-                        return q;
-                        }});
-                    }}
+                    function toPoints(points) {
+                        return (points || []).map(p => {
+                            const q = {};
+                            if ('time' in p) q.time = Number(p.time);
+                            if ('id' in p) q.id = Number(p.id);
+                            if ('price' in p) q.price = Number(p.price);
+                            if ('channel' in p) q.channel = String(p.channel);
+                            return q;
+                        });
+                    }
 
-                    function makeSig(rec) {{
-                        const pts  = toPoints(rec.points);
-                        const opts = rec.options || {{}};
+                    function makeSig(rec) {
+                        const pts = toPoints(rec.points);
+                        const opts = rec.options || {};
 
-                        const uniq = (rec.id != null) ? `#${{rec.id}}` : `#${{Math.random().toString(36).slice(2)}}`;
-                        return `${{rec.symbol}}|${{rec.shape_type}}|${{JSON.stringify(pts)}}|${{JSON.stringify(opts)}}${{uniq}}`;
-                    }}
+                        const uniq = (rec.id != null) ? `#${rec.id}` : `#${Math.random().toString(36).slice(2)}`;
+                        return `${rec.symbol}|${rec.shape_type}|${JSON.stringify(pts)}|${JSON.stringify(opts)}${uniq}`;
+                    }
 
-                    function clearRendered() {{
-                        for (const id of renderedById.values()) {{
-                        try {{ chart.removeEntity(id); }} catch (_) {{}}
-                        }}
+                    function clearRendered() {
+                        for (const id of renderedById.values()) {
+                            try { chart.removeEntity(id); } catch (_) { }
+                        }
                         renderedById.clear();
                         serverIdByEntityId.clear();
                         sigById.clear();
-                    }}
+                    }
 
-                    async function fetchShapes(sym) {{
-                        try {{
-                        const r = await fetch(`/shapes?symbol=${{encodeURIComponent(sym)}}`, {{ cache: 'no-store' }});
-                        if (!r.ok) return [];
-                        const j = await r.json();
-                        return j.items || [];
-                        }} catch (_) {{ return []; }}
-                    }}
+                    async function fetchShapes(sym) {
+                        try {
+                            const r = await fetch(`/shapes?symbol=${encodeURIComponent(sym)}`, { cache: 'no-store' });
+                            if (!r.ok) return [];
+                            const j = await r.json();
+                            return j.items || [];
+                        } catch (_) { return []; }
+                    }
 
-                    async function draw(rec) {{
-                    const sig  = makeSig(rec);
-                    const pts  = toPoints(rec.points);
-                    const opts = Object.assign({{ shape: rec.shape_type }}, rec.options || {{}});
+                    async function draw(rec) {
+                        const sig = makeSig(rec);
+                        const pts = toPoints(rec.points);
+                        const opts = Object.assign({ shape: rec.shape_type }, rec.options || {});
 
-                    // If this id already exists and content did not change, skip
-                    if (rec.id && sigById.get(rec.id) === sig) return;
+                        // If this id already exists and content did not change, skip
+                        if (rec.id && sigById.get(rec.id) === sig) return;
 
-                    // Update existing entity in-place if this id is already on the chart
-                    if (rec.id && renderedById.has(rec.id)) {{
-                        const entityId = renderedById.get(rec.id);
-                        const api = chart.getShapeById(entityId);
-                        try {{
-                        if (api) {{
-                            api.setPoints(pts);
-                            api.setProperties(opts);
+                        // Update existing entity in-place if this id is already on the chart
+                        if (rec.id && renderedById.has(rec.id)) {
+                            const entityId = renderedById.get(rec.id);
+                            const api = chart.getShapeById(entityId);
+                            try {
+                                if (api) {
+                                    api.setPoints(pts);
+                                    api.setProperties(opts);
+                                    sigById.set(rec.id, sig);
+                                    return; // <-- no recreation
+                                }
+                            } catch (e) { console.error(e); }
+                            // fallthrough → recreate if api missing/failed
+                        }
+
+                        if (rec.id != null) pendingCreates.push(rec.id); // optional, keeps the event flow consistent
+                        const entityId = (pts.length === 1)
+                            ? chart.createShape(pts[0], opts)
+                            : chart.createMultipointShape(pts, opts);
+
+                        if (rec.id != null && entityId != null) {
+                            renderedById.set(rec.id, entityId);
+                            serverIdByEntityId.set(entityId, rec.id);
                             sigById.set(rec.id, sig);
-                            return; // <-- no recreation
-                        }}
-                        }} catch (e) {{ console.error(e); }}
-                        // fallthrough → recreate if api missing/failed
-                    }}
+                        }
+                    }
 
-                    if (rec.id != null) pendingCreates.push(rec.id); // optional, keeps the event flow consistent
-                    const entityId = (pts.length === 1)
-                        ? chart.createShape(pts[0], opts)
-                        : chart.createMultipointShape(pts, opts);
 
-                    if (rec.id != null && entityId != null) {{
-                        renderedById.set(rec.id, entityId);
-                        serverIdByEntityId.set(entityId, rec.id);
-                        sigById.set(rec.id, sig);
-                    }}
-                    }}
-
-                    
-                    async function incrementalRefresh() {{
-                        const sym   = chart.symbol();
+                    async function incrementalRefresh() {
+                        const sym = chart.symbol();
                         const items = await fetchShapes(sym);
                         const incomingIds = new Set(items.map(r => r.id).filter(x => x != null));
 
@@ -282,37 +446,38 @@ index_html_raw = r'''
                         for (const rec of items) await draw(rec);
 
                         // remove missing (if any were deleted server-side)
-                        for (const [sid, entityId] of renderedById.entries()) {{
-                        if (!incomingIds.has(sid)) {{
-                            // We're removing because the server says it's gone — don't DELETE again
-                            suppressDbDelete.add(entityId);
-                            try {{ chart.removeEntity(entityId); }} catch (_) {{}}
-                            renderedById.delete(sid);
-                            serverIdByEntityId.delete(entityId);
-                            sigById.delete(sid);
-                            // keep renderedSigs so reappearing identical content doesn't flicker
-                        }}
-                        }}
-                    }}
+                        for (const [sid, entityId] of renderedById.entries()) {
+                            if (!incomingIds.has(sid)) {
+                                // We're removing because the server says it's gone — don't DELETE again
+                                suppressDbDelete.add(entityId);
+                                try { chart.removeEntity(entityId); } catch (_) { }
+                                renderedById.delete(sid);
+                                serverIdByEntityId.delete(entityId);
+                                sigById.delete(sid);
+                                // keep renderedSigs so reappearing identical content doesn't flicker
+                            }
+                        }
+                    }
 
-                    async function fullRefresh() {{
+                    async function fullRefresh() {
                         clearRendered();
                         await incrementalRefresh();
-                    }}
+                    }
 
-                    function startPolling() {{ stopPolling(); pollTimer = setInterval(incrementalRefresh, POLL_MS); }}
-                    function stopPolling()  {{ if (pollTimer) {{ clearInterval(pollTimer); pollTimer = null; }} }}
+                    function startPolling() { stopPolling(); pollTimer = setInterval(incrementalRefresh, POLL_MS); }
+                    function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+
 
                     // ── boot: try once now, and again after first data load (single-shot)
                     incrementalRefresh();
-                    chart.onDataLoaded().subscribe(null, function () {{
+                    chart.onDataLoaded().subscribe(null, function () {
                         incrementalRefresh();
-                    }}, true);
+                    }, true);
 
                     startPolling();
 
                     // ── symbol switch: hard reset, redraw once data is ready
-                    chart.onSymbolChanged().subscribe(null, function () {{
+                    chart.onSymbolChanged().subscribe(null, function () {
                         stopPolling();
                         clearRendered();
 
@@ -320,278 +485,25 @@ index_html_raw = r'''
                         incrementalRefresh();
 
                         // then single-shot after bars finish loading (avoids stacking handlers)
-                        chart.onDataLoaded().subscribe(null, function () {{
-                        fullRefresh();
-                        }}, true);
+                        chart.onDataLoaded().subscribe(null, function () {
+                            fullRefresh();
+                        }, true);
 
                         startPolling();
-                    }});
-                }});
-                //
-                //
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                //
-                window.frames[0].focus();
-            }};
-            //
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            window.addEventListener('DOMContentLoaded', initOnReady, false);
-            //
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-        </script>
+                    });
 
-    </head>
-
-    <body style="margin:0px;">
-
-        <div id="tv_chart_container"></div>
-
-    </body>
-
-</html>
+                    // -----------------------------------------------------------------------------------------------------------------------------
+                });
 '''
-#
-
-later_doc_str  = """
-
-    snapshot_url : str, optional
-        This URL is used to send a POST request with binary chart snapshots
-        when a user clicks the snapshot button.
-        This POST request contains multipart/form-data with the field
-        preparedImage that represents binary data of the snapshot image
-        in image/png format.
-
-    additional_symbol_info_fields        : list[AdditionalSymbolInfoField], optional
-        Extra fields to display in the Security Info dialog. Each item:
-        `{"title": str, "propertyName": str}` where `propertyName` is a symbol info key.
-        Example:
-            `[{"title": "Ticker", "propertyName": "ticker"}]`.
-
-    auto_save_delay        : int, optional
-        Throttle (seconds) for `onAutoSaveNeeded` callbacks to reduce save frequency.
-
-    charts_storage_api_version        : Literal["1.0","1.1"], optional
-        Version of your save/load backend. Study Templates require "1.1".
-
-    charts_storage_url        : str, optional
-        Base URL for the high-level save/load REST API. See “Save and load REST API”.
-
-    client_id        : str, optional
-        Client identifier used by the high-level save/load charts API.
-
-    compare_symbols        : list[CompareSymbol], optional
-        Default custom entries for the Compare window, e.g.
-        `[{"symbol": "DAL", "title": "Delta Air Lines"}]`.
-
-    context_menu        : ContextMenuOptions, optional
-        Overrides for the right-click context menu. Can also be changed at runtime via
-        `IChartingLibraryWidget.onContextMenu`.
-
-    custom_chart_description_function        : ChartDescriptorFunction, optional
-        Accessibility hook. Given a `context`, return a string description read by
-        screen readers when a chart is focused via Tab, or return `null` to use the
-        default. May be async (return a Promise).
-        Example (summarized):
-            `(ctx) => Promise.resolve(
-                "Chart " + (ctx.chartIndex+1) + " of " + ctx.chartCount + ". " +
-                ctx.chartTypeName + " chart of " + ctx.symbol + "."
-            )`.
-
-    custom_css_url        : str, optional
-        Absolute or relative URL to a CSS file injected into the chart (use to style
-        widgets outside the plot area—watchlist, etc.).
-
-    custom_font_family        : str, optional
-        CSS `font-family` applied to chart (time scale, price scale, panes).
-        If using a non-system font, load it in your CSS (e.g. Google Fonts) and then
-        reference it here. Format exactly as CSS `font-family`, e.g.
-        `"'Inconsolata', monospace"`.
-
-    custom_formatters        : CustomFormatters, optional
-        Custom formatting hooks:
-        • `timeFormatter.format(Date) -> str`
-        • `dateFormatter.format(Date) -> str`
-        • `tickMarkFormatter(Date, TickMarkType) -> str` (must format **UTC**)
-        • `priceFormatterFactory(symbolInfo, minTick) -> {format(price, signPositive)->str} | null`
-        • `studyFormatterFactory(format, symbolInfo) -> {format(value)->str} | null`
-        Return `null` from a `*Factory` to fall back to default formatters.
-
-    custom_themes        : CustomThemes, optional
-        Color tokens to override built-in light/dark themes.
-
-    custom_timezones        : list[CustomAliasedTimezone], optional
-        Define additional timezones beyond the built-in list.
-
-    custom_translate_function        : Callable[[str, str, str], str | None], optional
-        i18n override for UI strings. Receives `(originalText, singularOriginalText,
-        translatedText)` and should return a new translation string or `None` to use
-        the default. Example: rename “Trend Line” to “Line Drawing”.
-
-    drawings_access        : AccessList, optional
-        Whitelist/blacklist and restrictions for drawing tools (same structure as
-        `studies_access`). Special case: font-based drawings are grouped under
-        `"Font Icons"` and cannot be toggled individually.
-
-    header_widget_buttons_mode        : HeaderWidgetButtonsMode, optional
-        Button layout mode for the top toolbar. Default is adaptive (full size on
-        wide windows; iconified on narrow). Example: `"fullsize"`.
-
-    image_storage_adapter        : IImageStorageAdapter, optional
-        **Experimental.** Custom storage backend for images added via the image
-        drawing tool. Useful if you don’t want images embedded in saved layouts.
-
-    load_last_chart        : bool, optional
-        If True, loads the user’s last saved chart (after you implement save/load).
-        **Precedence:** If `symbol` is set, it overrides the saved symbol. To honor
-        the saved symbol, omit `symbol` when enabling `load_last_chart`.
-
-    loading_screen        : LoadingScreenOptions, optional
-        Spinner customization: `{backgroundColor?: str, foregroundColor?: str}`.
-
-    numeric_formatting        : NumericFormattingParams, optional
-        Number formatting options. Currently supports `decimal_sign` (e.g. `{ "decimal_sign": "," }`).
-
-    overrides        : dict[str, Any], optional
-        Programmatic overrides for widget-editable properties (series style, scales,
-        colors, etc.). Keys follow the “Widget Overrides” naming (e.g.
-        `"mainSeriesProperties.style": 2` for Line). **Note:** `overrides` do **not**
-        change values already persisted in user settings; use `settings_overrides` to
-        override persisted values.
-
-    save_load_adapter        : IExternalSaveLoadAdapter, optional
-        Custom implementation of save/load operations (if you don’t use the built-in
-        REST endpoints). See “API handlers”.
-
-    saved_data        : dict, optional
-        A pre-saved chart layout to load at widget creation. For deferred loading,
-        call `IChartingLibraryWidget.load()` instead.
-
-    saved_data_meta_info        : SavedStateMetaInfo, optional
-        Meta information associated with `saved_data`.
-
-    settings_adapter        : ISettingsAdapter, optional
-        Custom storage for user settings (get/set/remove and optional
-        `initialSettings`). Use to centralize persistence on your backend and bypass
-        localStorage.
-
-    settings_overrides        : dict[str, Any], optional
-        Forced values for settings that override anything loaded from localStorage or
-        a `settings_adapter`. Use this when you need to supersede persisted user
-        choices. Similar structure to `overrides`, but **applies to persisted
-        settings**.
-
-    studies_access        : AccessList, optional
-        Whitelist/blacklist and restrictions for indicators (studies). Example:
-        ```
-        {
-        "type": "black" | "white",
-        "tools": [{"name": "<study name>", "grayed": true}, ...]
-        }
-        ```
-
-    studies_overrides        : dict[str, Any], optional
-        Overrides for built-in indicators’ inputs/styles and for the Compare series.
-        Keys follow “StudyOverrides” naming, e.g. `"volume.volume.color.0": "#00FFFF"`.
-
-    study_count_limit        : int, optional
-        Maximum concurrent studies allowed in the layout (min 2).
-
-    symbol_search_complete        : Callable[[str, SearchSymbolResultItem|None], Awaitable[dict]],
-        optional
-        Async override for symbol selection from Symbol Search (not used for
-        watchlist additions). Receives raw input and an optional selected item; must
-        resolve to `{"symbol": str, "name": str}`. Useful to gather extra user input
-        before deciding the final symbol.
-
-    symbol_search_request_delay        : int, optional
-        Debounce (milliseconds) for symbol search requests as the user types.
-
-    time_frames        : list[TimeFrameItem], optional
-        Items shown on the bottom time-frame toolbar. Each item:
-        • `text`: label (e.g., `"3y"`, `"50y"`, `"3d"`)  
-        • `resolution`: resolution to apply (e.g., `"1D"`, `"6M"`, `"5"`)  
-        • `description`: human description  
-        • `title`: optional alternate label
-
-    time_scale        : TimeScaleOptions, optional
-        Extra control over bar density/spacing, e.g. `{ "min_bar_spacing": 10 }`.
-
-    timeframe        : str | dict, optional
-        Default visible time range:
-        • Relative: `'3D'`, `'6M'`, etc. (`D` = days, `M` = months)
-        • Fixed range: `{"from": <unix>, "to": <unix>}`
-        Note: Even with a fixed range, the chart still requests data up to “now” to
-        allow forward scrolling.
-
-    toolbar_bg        : str, optional
-        Toolbar background color (CSS color).
-
-    user_id        : str, optional
-        User identifier for the high-level save/load charts API.
-
-    Notes
-    -----
-    • **Precedence (favorites & settings):**
-    `settings_adapter` (if present) > localStorage (if enabled) > `favorites`.
-    Use `settings_overrides` to supersede persisted values; `overrides` only
-    affects current in-memory properties.
-
-    • **Accessibility:** Provide `custom_chart_description_function` for screen
-    readers if your layout includes multiple charts or non-obvious visual states.
-
-    • **Formatting:** `tickMarkFormatter` must format UTC time.
-
-    • **Performance:** Use `auto_save_delay` and `symbol_search_request_delay` to
-    control backend load. `autosize` avoids layout thrash from manual sizing.
-
-    • **Persistence:** Choose one path—`charts_storage_url/client_id/user_id` or a
-    `save_load_adapter`. Mixing is possible but clarify ownership of records.
-
-    Examples
-    --------
-    Minimal UDF setup:
-        widget = new TradingView.widget({
-            container: "tv_chart_container",
-            interval: "1D",
-            symbol: "AAPL",
-            locale: "en",
-            datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo_feed.tradingview.com"),
-            library_path: "charting_library/",
-            autosize: True,
-        })
-
-    Custom formatters (UTC tick marks & scientific price for a study):
-        custom_formatters = {
-            "tickMarkFormatter": lambda date, t: f"T{date.getUTCHours()}:{date.getUTCMinutes()}",
-            "studyFormatterFactory": lambda fmt, _si: (
-                {"format": lambda v: Intl.NumberFormat("en-US", {"notation": "scientific"}).format(v)}
-                if fmt["type"] == "price" else None
-            )
-        }
-
-    Fixed range:
-        timeframe = {"from": 1640995200, "to": 1643673600}  # 2022-01-01 .. 2022-02-01
-
-    Symbol search override:
-        async def symbol_search_complete(raw, item=None):
-            sym  = getNewSymbol(raw, item)
-            name = getHumanFriendlyName(sym, item)
-            return {"symbol": sym, "name": name}
-    """
 #
 ###################################################################################################
 ###################################################################################################
 ################################################################################################### Objects
 #
 JavaScriptCode = NewType('JavaScriptCode', str)
-
-
+#
+#################################################
+#
 class ThemeName(Enum):
 
     light = 'light'
@@ -1660,7 +1572,7 @@ class ChartWidget:
                  #
                  ################################################################################################## Custom Indicator and Study
                  #
-                 custom_indicators_getter                 : Optional[JavaScriptCode]                       = None,
+                 custom_indicators_getter                 : Optional[JavaScriptCode]                       = custom_indicators_getter,
                  #
                  ################################################################################################## .
                  #
@@ -1761,7 +1673,7 @@ class ChartWidget:
         self.disabled_features        = ("") if (disabled_features        is None) else (f"disabled_features        : {[f"{feat}" for feat in disabled_features]},")
         self.enabled_features         = ("") if (enabled_features         is None) else (f"enabled_features         : {[f"{feat}" for feat in enabled_features]},")
 
-        self.custom_indicators_getter = ("") if (custom_indicators_getter is None) else (f"custom_indicators_getter : {custom_indicators_getter},")
+        self.custom_indicators_getter = ("") if (custom_indicators_getter is None) else (f"custom_indicators_getter : {custom_indicators_getter}")
     #
 
     def _generate_index_html(self):
@@ -1771,18 +1683,33 @@ class ChartWidget:
         widget_dir.mkdir(parents=True, exist_ok=True)
         frontend_file = widget_dir / "index.html"
 
+
+        
+        widget_tv = javascript_widget_TradingView.format(debug=self.debug, library_path=self.library_path,
+                                                         datafeed=self.datafeed, container=self.container,
+                                                         theme=self.theme, symbol=self.symbol, interval=self.interval,
+                                                         timezone=self.timezone, locale=self.locale,
+                                                         autosize=self.autosize, fullscreen=self.fullscreen, height=self.height, width=self.width,
+                                                         favorites=self.favorites,
+                                                         disabled_features=self.disabled_features, enabled_features=self.enabled_features,
+                                                         custom_indicators_getter=self.custom_indicators_getter
+                                                        )
+
+        onready = javascript_function_initOnReady.format(javascript_datafeedUrl=javascript_datafeedUrl,
+                                                         javascript_widget_TradingView=widget_tv,
+                                                         function_onChartReady=function_onChartReady,
+                                                        )
+
+        html_index = raw_index_html.format(javascript_function_getParameterByName=javascript_function_getParameterByName,
+                                           javascript_window_addEventListener=javascript_window_addEventListener,
+                                           JAVASCRIPT_FUNCTION_INITONREADY=onready,
+                                          )
+
+
         
         with open(frontend_file, "w") as file:
 
-            file.write(index_html_raw.format(
-                                             debug=self.debug, library_path=self.library_path, datafeed=self.datafeed, container=self.container, theme=self.theme, symbol=self.symbol, interval=self.interval,
-
-                                             timezone=self.timezone, locale=self.locale, autosize=self.autosize, fullscreen=self.fullscreen, height=self.height, width=self.width,
-
-                                             favorites=self.favorites, disabled_features=self.disabled_features, enabled_features=self.enabled_features,
-
-                                             custom_indicators_getter=self.custom_indicators_getter
-                                            ))
+            file.write(html_index)
         #
 
         return (frontend_file)
