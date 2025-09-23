@@ -1,12 +1,12 @@
-# BrainyCharts Project Structure
+# BrainChart Project Structure
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 
 <details>
 <summary>Main Structure</summary>
 
-- **BrainyCharts/**
-  - **`brainycharts/`**: The core package for the BrainyCharts application, containing all the logic for data handling, server management, and chart rendering.
+- **BrainChart/**
+  - **`brainchart/`**: The core package for the BrainChart application, containing all the logic for data handling, server management, and chart rendering.
   - **`charting_library/`**: Contains the TradingView's advanced charts Library, which is like a 'black box' for us.
   - **`Docs/`**: Project documentations.
   - **`env/`**: Environment-related files, such as conda environment configurations and pip requirements.
@@ -22,14 +22,14 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 
 <details>
-<summary>brainycharts/</summary>
+<summary>brainchart/</summary>
 
 ```bash
-    brainycharts/                                 # The core package for the BrainyCharts application, containing all the logic for data handling, server management, and chart rendering.
+    brainchart/                                    # The core package for the BrainChart application, containing all the logic for data handling, server management, and chart rendering.
     │
-    ├── __init__.py                                # Marks the `brainycharts` directory as a Python package, allowing its modules to be imported.
+    ├── __init__.py                                # Marks the `brainchart` directory as a Python package, allowing its modules to be imported.
     │
-    ├── brainy.py                                  # The main user-facing module. It contains the `BrainyChart` class, which is the primary entry point for creating and managing charts. This class handles data processing, starts the backend server, and provides methods for interacting with the chart's features, such as drawing shapes.
+    ├── brain.py                                   # The main user-facing module. It contains the `BrainChart` class, which is the primary entry point for creating and managing charts. This class handles data processing, starts the backend server, and provides methods for interacting with the chart's features, such as drawing shapes.
     │
     ├── custom_indicators.py                       # Custom indicator/study functionalities.
     │

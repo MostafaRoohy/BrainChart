@@ -1,4 +1,4 @@
-# BrainyCharts
+# BrainChart
 
 *A Python wrapper around TradingView’s Advanced Charting Library with a Pythonic datafeed, widget generator, and runtime shape‑API.*
 
@@ -6,9 +6,9 @@
 
 ## ✨
 
-**BrainyCharts** — Python × TradingView Advanced Charts
+**BrainChart** — Python × TradingView Advanced Charts
 
-BrainyCharts connects your Python data (Pandas/NumPy) to TradingView’s Advanced Charting Library. It provides:
+BrainChart connects your Python data (Pandas/NumPy) to TradingView’s Advanced Charting Library. It provides:
 
 * A minimal **UDF-compatible FastAPI backend** (`/config`, `/search`, `/symbols`, `/history`, `/time`).
 * A **Symbol** model to register local OHLCV CSV + metadata.
@@ -38,12 +38,12 @@ Objective: fast iteration for research and prototyping without switching stacks.
 
 ```bash
 # clone the repo
-git clone https://github.com/MostafaRoohy/BrainyCharts.git
-cd BrainyCharts
+git clone https://github.com/MostafaRoohy/BrainChart.git
+cd BrainChart
 
 # create and activate the environment
 conda env create -f env/environment.yml
-conda activate brainycharts
+conda activate brainchart
 ```
 
 ### Option B — pip
@@ -52,7 +52,7 @@ conda activate brainycharts
 pip install -r env/requirements.txt
 ```
 
-> Note: The project is not yet packaged. Import from the repo root (so `import brainycharts` works) or add the repo to `PYTHONPATH`.
+> Note: The project is not yet packaged. Import from the repo root (so `import brainchart` works) or add the repo to `PYTHONPATH`.
 
 ---
 
@@ -80,7 +80,7 @@ All exampled csv files exist in `playground/candle_data/`.
 ```python
 import time
 import pandas as pd
-from brainycharts import Symbol, ChartWidget, BrainyChart
+from brainchart import Symbol, ChartWidget, BrainChart
 
 
 # 1) Prepare OHLCV DataFrame (timestamp in ms)
@@ -99,9 +99,9 @@ symbol_1 = Symbol(tohlcv_df   = df_1,
 widget = ChartWidget(symbol=symbol_1)
 
 
-# 3) Create the BrainyChart
-brainy_chart = BrainyChart(symbols_list=[symbol_1], chart_widget=widget)
-brainy_chart.imagine()
+# 3) Create the BrainChart
+brain_chart = BrainChart(symbols_list=[symbol_1], chart_widget=widget)
+brain_chart.imagine()
 
 
 # 4) Open browser and navigate to the generated server: http://localhost:8000
@@ -111,7 +111,7 @@ brainy_chart.imagine()
 
 ```python
 import pandas as pd
-from brainycharts import Symbol, ChartWidget, BrainyChart
+from brainchart import Symbol, ChartWidget, BrainChart
 
 
 # 1) Prepare OHLCV DataFrame (timestamp in ms)
@@ -133,9 +133,9 @@ symbol_2 = Symbol(tohlcv_df   = df_2,
                   exchange    = "DEx")
 
 
-# 3) Create the BrainyChart
-brainy_chart = BrainyChart(symbols_list=[symbol_1, symbol_2])
-brainy_chart.imagine()
+# 3) Create the BrainChart
+brain_chart = BrainChart(symbols_list=[symbol_1, symbol_2])
+brain_chart.imagine()
 
 
 # 4) Open browser and navigate to the generated server: http://localhost:8000
@@ -147,7 +147,7 @@ Switch symbols from the widget’s native UI.
 
 ```python
 import pandas as pd
-from brainycharts import Symbol, ChartWidget, BrainyChart
+from brainchart import Symbol, ChartWidget, BrainChart
 
 
 # 1) Prepare OHLCV DataFrame (timestamp in ms). The df has extra columns 'series_1', 'series_2', 'series_3'.
@@ -164,9 +164,9 @@ symbol_1 = Symbol(tohlcv_df     = df_1,
                   series_panel  = ['overlay', 'pane'])
 
 
-# 3) Create the BrainyChart
-brainy_chart = BrainyChart(symbols_list=[symbol_1])
-brainy_chart.imagine()
+# 3) Create the BrainChart
+brain_chart = BrainChart(symbols_list=[symbol_1])
+brain_chart.imagine()
 
 
 # 4) Open browser and navigate to the generated server: http://localhost:8000
@@ -178,7 +178,7 @@ The custom series become selectable in the UI (overlay vs. an auxiliary pane).
 
 ```python
 import pandas as pd
-from brainycharts import Symbol, ChartWidget, BrainyChart
+from brainchart import Symbol, ChartWidget, BrainChart
 
 
 # 1) Prepare OHLCV DataFrame (timestamp in ms)
@@ -200,16 +200,16 @@ symbol_2 = Symbol(tohlcv_df   = df_2,
                   exchange    = "DEx")
 
 
-# 3) Create the BrainyChart
-brainy_chart = BrainyChart(symbols_list=[symbol_1, symbol_2])
-brainy_chart.imagine()
+# 3) Create the BrainChart
+brain_chart = BrainChart(symbols_list=[symbol_1, symbol_2])
+brain_chart.imagine()
 
 
 # 4) Open browser and navigate to the generated server: http://localhost:8000
 
 
 # 5) Make shapes
-from brainycharts.shape import Shapes, ShapeType, ShapePoint, TrendlineOverrides
+from brainchart.shape import Shapes, ShapeType, ShapePoint, TrendlineOverrides
 
 shaper_1 = Shapes(symbol_1)
 shape    = ShapeType.trend_line
@@ -223,7 +223,7 @@ shaper_1.create(shape, points, ovr)
 
 ```python
 import pandas as pd
-from brainycharts import Symbol, ChartWidget, BrainyChart
+from brainchart import Symbol, ChartWidget, BrainChart
 
 
 # 1) Prepare OHLCV DataFrame (timestamp in ms)
@@ -245,16 +245,16 @@ symbol_2 = Symbol(tohlcv_df   = df_2,
                   exchange    = "DEx")
 
 
-# 3) Create the BrainyChart
-brainy_chart = BrainyChart(symbols_list=[symbol_1, symbol_2])
-brainy_chart.imagine()
+# 3) Create the BrainChart
+brain_chart = BrainChart(symbols_list=[symbol_1, symbol_2])
+brain_chart.imagine()
 
 
 # 4) Open browser and navigate to the generated server: http://localhost:8000
 
 
 # 5) Make shapes
-from brainycharts.shape import Shapes, ShapeType, ShapePoint, TrendlineOverrides
+from brainchart.shape import Shapes, ShapeType, ShapePoint, TrendlineOverrides
 
 shaper_1 = Shapes(symbol_1)
 shape    = ShapeType.trend_line
@@ -291,7 +291,7 @@ Just ping me, and we will have a friendly chat and plan for the project.
 
 ## ❤️ Donations
 
-If you rely on BrainyCharts in production or research, sponsoring helps prioritize maintenance and new features.
+If you rely on BrainChart in production or research, sponsoring helps prioritize maintenance and new features.
 
 Or if you would like to support this project, you can donate using the following methods:
 

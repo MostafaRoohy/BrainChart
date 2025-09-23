@@ -23,7 +23,7 @@ raw_index_html                        = r'''
 
     <head>
 
-        <title>BrainyCharts</title>
+        <title>BrainCharts</title>
         
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
         <script type="text/javascript" src="/charting_library/charting_library/charting_library.standalone.js"></script>
@@ -311,7 +311,7 @@ function_onChartReady = r'''
 
                     // -----------------------------------------------------------------------------------------------------------------------------
 
-                    // --------------------------------------------------------------------------------------------------------- BrainyCharts: shape
+                    // --------------------------------------------------------------------------------------------------------- BrainChart: shape
 
                     const renderedById = new Map();  // server shape id -> entityId (number)
                     const serverIdByEntityId = new Map();  // entityId (number) -> server shape id

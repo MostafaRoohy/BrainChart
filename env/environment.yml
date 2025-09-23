@@ -73,7 +73,7 @@
 #
 # conda env update --file environment.yml --prune           (Use --prune to update packages or remove unused packages from a YAML file)
 #
-name: Project_BrainyCharts
+name: Project_BrainChart
 channels:
   - conda-forge
   - defaults

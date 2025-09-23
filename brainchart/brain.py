@@ -1,5 +1,5 @@
 #
-# The main user-facing classe, BrainyChart, which is used to start the application.
+# The main user-facing classe, BrainChart, which is used to start the application.
 #
 ###################################################################################################
 ###################################################################################################
@@ -27,9 +27,9 @@ from .widget import ChartWidget
 #
 ###################################################################################################
 ###################################################################################################
-################################################################################################### BrainyChart
+################################################################################################### BrainChart
 #
-class BrainyChart:
+class BrainChart:
 
     def __init__(self, symbols_list:List[Symbol]=None, chart_widget:ChartWidget=None, server_port=8000):
         
@@ -114,11 +114,11 @@ class BrainyChart:
             package_dir = Path(__file__).parent
             root_dir    = package_dir.parent
 
-            module_path = "brainycharts.fast_api:app"
+            module_path = "brainchart.fast_api:app"
 
             cmd = ["uvicorn", module_path, "--host", "0.0.0.0", "--port", str(self.server_port)]
 
-            # Ensure the project root is on PYTHONPATH so 'brainycharts.*' imports work
+            # Ensure the project root is on PYTHONPATH so 'brainchart.*' imports work
             env = os.environ.copy()
             env["PYTHONPATH"] = str(root_dir) + (os.pathsep + env.get("PYTHONPATH",""))
             

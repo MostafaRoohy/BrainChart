@@ -35,7 +35,7 @@ from .database import engine, Base, get_db, Shape
 ###################################################################################################
 ################################################################################################### Directories
 #
-ROOT_DIR      = Path(__file__).resolve().parent.parent      # project root (BrainyCharts/)
+ROOT_DIR      = Path(__file__).resolve().parent.parent      # project root (BrainChart/)
 
 WIDGET_DIR    = ROOT_DIR / "runtime" / "widget"             # runtime/widget
 DATAFEED_DIR  = ROOT_DIR / "runtime" / "datafeed"           # runtime/datafeed
@@ -686,7 +686,7 @@ def delete_shape(shape_id: int, db: Session = Depends(get_db)):
 ###################################################################################################
 ################################################################################################### Mounts
 #
-app = FastAPI(title="BrainyCharts Backend")
+app = FastAPI(title="BrainChart Backend")
 app.include_router(router)
 app.add_middleware(
     CORSMiddleware,

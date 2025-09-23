@@ -4,10 +4,10 @@
 ###################################################################################################
 #
 """
-BrainyCharts public API.
+BrainChart public API.
 
 This package exposes a small, stable surface:
-- BrainyChart orchestrator (spin up the server, generate runtime assets)
+- BrainChart orchestrator (spin up the server, generate runtime assets)
 - Symbol model (write CSV + registry)
 - ChartWidget (HTML generator)
 - Shape domain + helpers (typed points/options/overrides, create/list/delete)
@@ -19,9 +19,9 @@ This package exposes a small, stable surface:
 #
 __version__ = "0.9.3"
 
-# `from brainycharts import *` exposes
+# `from brainchart import *` exposes
 __all__ = [
-    "BrainyChart",
+    "BrainChart",
     "Symbol",
     "ChartWidget",
 
@@ -54,7 +54,7 @@ __all__ = [
 ###################################################################################################
 #
 # Orchestrator
-from .brain import BrainyChart
+from .brain import BrainChart
 
 # Symbols
 from .symbol import Symbol

@@ -28,7 +28,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DB_DIR   = ROOT_DIR / "runtime" / "database"
 DB_DIR.mkdir(parents=True, exist_ok=True)
-DB_FILE  = DB_DIR / "BrainyCharts.db"
+DB_FILE  = DB_DIR / "BrainChart.db"
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_FILE}"
 
 engine       = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
