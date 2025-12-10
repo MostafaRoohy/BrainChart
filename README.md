@@ -43,7 +43,7 @@ cd BrainChart
 
 # create and activate the environment
 conda env create -f env/environment.yml
-conda activate brainchart
+conda activate Project_BrainChart
 ```
 
 ### Option B — pip
