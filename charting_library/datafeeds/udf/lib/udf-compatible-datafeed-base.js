@@ -182,14 +182,13 @@ export class UDFCompatibleDatafeedBase {
             }
             this._send('symbols', params)
                 .then((response) => {
-                var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1;
                 if (response.s !== undefined) {
                     onError('unknown_symbol');
                 }
                 else {
                     const symbol = response.name;
-                    const listedExchange = (_a = response.listed_exchange) !== null && _a !== void 0 ? _a : response['exchange-listed'];
-                    const tradedExchange = (_b = response.exchange) !== null && _b !== void 0 ? _b : response['exchange-traded'];
+                    const listedExchange = response.listed_exchange ?? response['exchange-listed'];
+                    const tradedExchange = response.exchange ?? response['exchange-traded'];
                     const result = {
                         ...response,
                         name: symbol,
@@ -197,24 +196,24 @@ export class UDFCompatibleDatafeedBase {
                         listed_exchange: listedExchange,
                         exchange: tradedExchange,
                         ticker: response.ticker,
-                        currency_code: (_c = response.currency_code) !== null && _c !== void 0 ? _c : response['currency-code'],
-                        original_currency_code: (_d = response.original_currency_code) !== null && _d !== void 0 ? _d : response['original-currency-code'],
-                        unit_id: (_e = response.unit_id) !== null && _e !== void 0 ? _e : response['unit-id'],
-                        original_unit_id: (_f = response.original_unit_id) !== null && _f !== void 0 ? _f : response['original-unit-id'],
-                        unit_conversion_types: (_g = response.unit_conversion_types) !== null && _g !== void 0 ? _g : response['unit-conversion-types'],
-                        has_intraday: (_j = (_h = response.has_intraday) !== null && _h !== void 0 ? _h : response['has-intraday']) !== null && _j !== void 0 ? _j : false,
-                        visible_plots_set: (_k = response.visible_plots_set) !== null && _k !== void 0 ? _k : response['visible-plots-set'],
-                        minmov: (_m = (_l = response.minmovement) !== null && _l !== void 0 ? _l : response.minmov) !== null && _m !== void 0 ? _m : 0,
-                        minmove2: (_o = response.minmovement2) !== null && _o !== void 0 ? _o : response.minmove2,
-                        session: (_p = response.session) !== null && _p !== void 0 ? _p : response['session-regular'],
-                        session_holidays: (_q = response.session_holidays) !== null && _q !== void 0 ? _q : response['session-holidays'],
-                        supported_resolutions: (_t = (_s = (_r = response.supported_resolutions) !== null && _r !== void 0 ? _r : response['supported-resolutions']) !== null && _s !== void 0 ? _s : this._configuration.supported_resolutions) !== null && _t !== void 0 ? _t : [],
-                        has_daily: (_v = (_u = response.has_daily) !== null && _u !== void 0 ? _u : response['has-daily']) !== null && _v !== void 0 ? _v : true,
-                        intraday_multipliers: (_x = (_w = response.intraday_multipliers) !== null && _w !== void 0 ? _w : response['intraday-multipliers']) !== null && _x !== void 0 ? _x : ['1', '5', '15', '30', '60'],
-                        has_weekly_and_monthly: (_y = response.has_weekly_and_monthly) !== null && _y !== void 0 ? _y : response['has-weekly-and-monthly'],
-                        has_empty_bars: (_z = response.has_empty_bars) !== null && _z !== void 0 ? _z : response['has-empty-bars'],
-                        volume_precision: (_0 = response.volume_precision) !== null && _0 !== void 0 ? _0 : response['volume-precision'],
-                        format: (_1 = response.format) !== null && _1 !== void 0 ? _1 : 'price',
+                        currency_code: response.currency_code ?? response['currency-code'],
+                        original_currency_code: response.original_currency_code ?? response['original-currency-code'],
+                        unit_id: response.unit_id ?? response['unit-id'],
+                        original_unit_id: response.original_unit_id ?? response['original-unit-id'],
+                        unit_conversion_types: response.unit_conversion_types ?? response['unit-conversion-types'],
+                        has_intraday: response.has_intraday ?? response['has-intraday'] ?? false,
+                        visible_plots_set: response.visible_plots_set ?? response['visible-plots-set'],
+                        minmov: response.minmovement ?? response.minmov ?? 0,
+                        minmove2: response.minmovement2 ?? response.minmove2,
+                        session: response.session ?? response['session-regular'],
+                        session_holidays: response.session_holidays ?? response['session-holidays'],
+                        supported_resolutions: response.supported_resolutions ?? response['supported-resolutions'] ?? this._configuration.supported_resolutions ?? [],
+                        has_daily: response.has_daily ?? response['has-daily'] ?? true,
+                        intraday_multipliers: response.intraday_multipliers ?? response['intraday-multipliers'] ?? ['1', '5', '15', '30', '60'],
+                        has_weekly_and_monthly: response.has_weekly_and_monthly ?? response['has-weekly-and-monthly'],
+                        has_empty_bars: response.has_empty_bars ?? response['has-empty-bars'],
+                        volume_precision: response.volume_precision ?? response['volume-precision'],
+                        format: response.format ?? 'price',
                     };
                     onResultReady(result);
                 }
