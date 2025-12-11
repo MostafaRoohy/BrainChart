@@ -386,7 +386,7 @@ def _agg_series(x:pd.DataFrame, col:str, kind:str, n:int) -> pd.DataFrame:
 #
 
 @router.get("/symbols")
-async def get_symbols(symbol: str):
+async def get_symbols(symbol:str):
 
     pair = parse_series_symbol(symbol)
     if (pair):
@@ -561,10 +561,10 @@ async def get_history(symbol:str, resolution:str, from_time:int=Query(..., alias
 #
 def _canon(obj):
 
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return (json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
 #
 
-def _normalize_points(points: List[Dict]) -> List[Dict]:
+def _normalize_points(points:List[Dict]) -> List[Dict]:
 
     pts = []
 
@@ -572,10 +572,19 @@ def _normalize_points(points: List[Dict]) -> List[Dict]:
 
         q = dict(p)
 
-        if "time" in q:   q["time"]   = int(q["time"])
-        if "id" in q:     q["id"]     = int(q["id"])
-        if "price" in q:  q["price"]  = float(q["price"])
-        if "channel" in q and q["channel"] is not None:
+        if ("time" in q):
+            
+            q["time"] = int(q["time"])
+        #
+        if ("id" in q):
+            
+            q["id"] = int(q["id"])
+        #
+        if ("price" in q):
+            
+            q["price"] = float(q["price"])
+        #
+        if ("channel" in q  and  q["channel"] is not None):
 
             q["channel"] = str(q["channel"])
         #
@@ -583,11 +592,11 @@ def _normalize_points(points: List[Dict]) -> List[Dict]:
         pts.append(q)
     #
 
-    return pts
+    return (pts)
 #
 
 @router.post("/shapes", response_model=ShapeResponse)
-def create_shape(payload: ShapeCreate, db: Session = Depends(get_db)):
+def create_shape(payload:ShapeCreate, db:Session=Depends(get_db)):
 
     pts = _normalize_points(payload.points)
 
@@ -601,33 +610,46 @@ def create_shape(payload: ShapeCreate, db: Session = Depends(get_db)):
         options    = payload.options or {},
         sig        = sig,
     )
+
     db.add(shape)
     db.commit()
     db.refresh(shape)
+
     return {
-        "id": shape.id,
-        "symbol": shape.symbol,
-        "shape_type": shape.shape_type,
-        "points": shape.points,
-        "options": shape.options,
-        "created_at": shape.created_at,
+        "id"         : shape.id,
+        "symbol"     : shape.symbol,
+        "shape_type" : shape.shape_type,
+        "points"     : shape.points,
+        "options"    : shape.options,
+        "created_at" : shape.created_at,
     }
 #
 
 @router.put("/shapes/{shape_id}", response_model=ShapeResponse)
-def update_shape(shape_id: int, payload: ShapeUpdate, db: Session = Depends(get_db)):
-    s = db.get(Shape, shape_id)
-    if not s:
-        raise HTTPException(404, "shape not found")
+def update_shape(shape_id:int, payload:ShapeUpdate, db:Session=Depends(get_db)):
 
-    if payload.symbol is not None:
+    s = db.get(Shape, shape_id)
+    if (not s):
+
+        raise HTTPException(404, "shape not found")
+    #
+
+    if (payload.symbol is not None):
+
         s.symbol = payload.symbol
-    if payload.shape_type is not None:
+    #
+    if (payload.shape_type is not None):
+
         s.shape_type = payload.shape_type
-    if payload.points is not None:
+    #
+    if (payload.points is not None):
+
         s.points = _normalize_points(payload.points)
-    if payload.options is not None:
+    #
+    if (payload.options is not None):
+
         s.options = payload.options
+    #
 
     sig_src = f"{s.symbol}|{s.shape_type}|{_canon(s.points)}|{_canon(s.options or {})}"
     s.sig   = hashlib.sha1(sig_src.encode("utf-8")).hexdigest()
@@ -635,40 +657,41 @@ def update_shape(shape_id: int, payload: ShapeUpdate, db: Session = Depends(get_
     db.add(s)
     db.commit()
     db.refresh(s)
+
     return {
-        "id": s.id,
-        "symbol": s.symbol,
-        "shape_type": s.shape_type,
-        "points": s.points,
-        "options": s.options,
-        "created_at": s.created_at,
+        "id"         : s.id,
+        "symbol"     : s.symbol,
+        "shape_type" : s.shape_type,
+        "points"     : s.points,
+        "options"    : s.options,
+        "created_at" : s.created_at,
     }
 #
 
 @router.get("/shapes", response_model=ShapeAPIResponse)
-def list_shapes(symbol: str | None = None, db: Session = Depends(get_db)):
+def list_shapes(symbol:str|None=None, db:Session=Depends(get_db)):
 
     q = db.query(Shape)
 
-    if symbol:
+    if (symbol):
 
         q = q.filter(Shape.symbol == symbol)
     #
 
     items = [{
-        "id": s.id,
-        "symbol": s.symbol,
-        "shape_type": s.shape_type,
-        "points": s.points,
-        "options": s.options,
-        "created_at": s.created_at,
+        "id"         : s.id,
+        "symbol"     : s.symbol,
+        "shape_type" : s.shape_type,
+        "points"     : s.points,
+        "options"    : s.options,
+        "created_at" : s.created_at,
     } for s in q.order_by(Shape.created_at.asc()).all()]
 
     return {"items": items}
 #
 
 @router.delete("/shapes/{shape_id}")
-def delete_shape(shape_id: int, db: Session = Depends(get_db)):
+def delete_shape(shape_id:int, db:Session=Depends(get_db)):
 
     s = db.get(Shape, shape_id)
 
@@ -701,7 +724,7 @@ app.add_middleware(GZipMiddleware, minimum_size=500)
 app.mount("/charting_library", StaticFiles(directory=str(TV_LIB_DIR), html=False), name="charting_library")
 app.mount("/datafeeds"       , StaticFiles(directory=str(TV_DF_DIR) , html=False), name="datafeeds")
 app.mount("/"                , StaticFiles(directory=str(WIDGET_DIR), html=True) , name="frontend")
-# region for now I decided to define the entry index.html as static mounting for the sake of symmetricity
+# region - For now I decided to define the entry index.html as static mounting for the sake of symmetricity
     # @app.get("/")
     # def serve_widget_index():
     #     index_path = FRONTEND_DIR / "index.html"
