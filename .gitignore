@@ -1,4 +1,6 @@
 /.bAckups/
+/.vscode/
+/learning/
 /runtime/
 /playground/MyExample.ipynb
 __pycache__
