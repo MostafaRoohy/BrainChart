@@ -709,7 +709,7 @@ class Symbol:
 
         registry = {}
 
-        if registry_path.exists():
+        if (registry_path.exists()):
 
             with open(registry_path, 'r', encoding='utf-8') as f:
 
