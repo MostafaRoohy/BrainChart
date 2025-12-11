@@ -65,7 +65,7 @@ class Frame(Enum):
 
     def __str__(self):
 
-        return self.value
+        return (self.value)
     #
 
     def __repr__(self):
@@ -80,7 +80,6 @@ class ResolutionString:
 
         self.resolution = f"{x}{frame.value}"
     #
-
 
     def __str__(self):
         
@@ -270,7 +269,7 @@ class Timezone(Enum):
 
     def __str__(self):
 
-        return self.value
+        return (self.value)
     #
 
     def __repr__(self):
@@ -510,107 +509,107 @@ class Symbol:
     _tickers = []
 
     def __init__(self,
-            #
-            # region params V1
-            #
-            ################################################################################################## Urgent
-            #
-            tohlcv_df                : pd.DataFrame                      = pd.DataFrame(),
-            series_columns           : list[str]                         = None,
-            series_colors            : list[str]                         = None,
-            series_panels            : list[Literal['panel', 'overlay']] = None,
-            series_styles            : list[Literal['line','columns',
-                                                    'histogram','area',
-                                                    'step']] | None      = None,
-            series_widths            : list[float]                       = None,
-            
-            ticker                   : str                               = "TICKER",
-            name                     : str                               = "Name",
-            base_name                : Optional[List[str]]               = None,
-            library_custom_fields    : Optional[Dict[str, Any]]          = None,
-            #
-            ################################################################################################## Core Symbol Info
-            #
-            description              : str                               = "Description",
-            long_description         : Optional[str]                     = None,
-            type                     : SymbolType                        = SymbolType.undefined,
-            exchange                 : str                               = "ExChange",
-            listed_exchange          : str                               = "ExChange",
-            sector                   : Optional[str]                     = None,
-            industry                 : Optional[list[str]]               = None,
-            logo_urls                : Optional[str|List[str]]           = None,
-            exchange_logo            : Optional[str]                     = None,
-            #
-            ################################################################################################## Price & Volume Formatting
-            #
-            format                   : SeriesFormat                      = SeriesFormat.price,
-            pricescale               : int                               = 1_00_000_000,
-            minmov                   : int                               = 1,
-            minmove2                 : Optional[int]                     = None,
-            fractional               : Optional[bool]                    = None,
-            variable_tick_size       : Optional[str]                     = None,
-            visible_plots_set        : Optional[VisiblePlotsSet]         = None,
-            volume_precision         : Optional[int]                     = 0,
-            #
-            ################################################################################################## Resolutions
-            #
-            has_daily                : Optional[bool]                    = True,
-            has_intraday             : Optional[bool]                    = True,
-            has_seconds              : Optional[bool]                    = True,
-            has_ticks                : Optional[bool]                    = False,
-            has_weekly_and_monthly   : Optional[bool]                    = False,
-            has_empty_bars           : Optional[bool]                    = False,
-            build_seconds_from_ticks : Optional[bool]                    = False,
-            supported_resolutions    : Optional[list[ResolutionString]]  = ["1S", "5S", "1", "3", "5", "15", "30", "60", "240", "D", "W"],
-            intraday_multipliers     : Optional[List[str]]               = None,
-            seconds_multipliers      : Optional[List[str]]               = ["1", "2", "3", "4", "5", "10", "15", "20", "30", "40"],
-            daily_multipliers        : Optional[List[str]]               = ["1"],
-            weekly_multipliers       : Optional[List[str]]               = ["1"],
-            monthly_multipliers      : Optional[List[str]]               = ["1"],
-            #
-            ################################################################################################## .
-            #
-            # endregion
-            #
-            # region params V2. These params will be implemented in V2
-            #
-            ################################################################################################## Data Capabilities & Status
-            #
-            data_status              : Optional[DataStatus]              = None,
-            delay                    : Optional[int]                     = None,
-            #
-            ################################################################################################## Session and Time
-            #
-            session                  : str                               = "24x7",
-            session_display          : Optional[str]                     = None,
-            session_holidays         : Optional[str]                     = None,
-            subsession_id            : Optional[str]                     = None,
-            subsessions              : Optional[List[SubsessionInfo]]    = None,
-            timezone                 : Timezone                          = Timezone.Etc_UTC,
-            corrections              : Optional[str]                     = None,
-            #
-            ################################################################################################## Futures/Options
-            #
-            expired                  : Optional[bool]                    = False,
-            expiration_date          : Optional[int]                     = None,
-            #
-            ################################################################################################## Units & Currency
-            #
-            currency_code            : Optional[str]                     = None,
-            original_currency_code   : Optional[str]                     = None,
-            unit_id                  : Optional[str]                     = None,
-            original_unit_id         : Optional[str]                     = None,
-            unit_conversion_types    : Optional[List[str]]               = None,
-            #
-            ################################################################################################## Price sources
-            #
-            price_source_id          : Optional[SymbolPriceSource]       = None, # ??
-            price_sources            : Optional[List[SymbolPriceSource]] = None, # ??
-            ################################################################################################## .
-            #
-            #endregion
-            #
-        ):
+        #
+        # region params V1
+        #
+        ################################################################################################## Urgent
+        #
+        tohlcv_df                : pd.DataFrame                      = pd.DataFrame(),
+        series_columns           : list[str]                         = None,
+        series_colors            : list[str]                         = None,
+        series_panels            : list[Literal['panel', 'overlay']] = None,
+        series_styles            : list[Literal['line','columns',
+                                                'histogram','area',
+                                                'step']] | None      = None,
+        series_widths            : list[float]                       = None,
+        
+        ticker                   : str                               = "TICKER",
+        name                     : str                               = "Name",
+        base_name                : Optional[List[str]]               = None,
+        library_custom_fields    : Optional[Dict[str, Any]]          = None,
+        #
+        ################################################################################################## Core Symbol Info
+        #
+        description              : str                               = "Description",
+        long_description         : Optional[str]                     = None,
+        type                     : SymbolType                        = SymbolType.undefined,
+        exchange                 : str                               = "ExChange",
+        listed_exchange          : str                               = "ExChange",
+        sector                   : Optional[str]                     = None,
+        industry                 : Optional[list[str]]               = None,
+        logo_urls                : Optional[str|List[str]]           = None,
+        exchange_logo            : Optional[str]                     = None,
+        #
+        ################################################################################################## Price & Volume Formatting
+        #
+        format                   : SeriesFormat                      = SeriesFormat.price,
+        pricescale               : int                               = 1_00_000_000,
+        minmov                   : int                               = 1,
+        minmove2                 : Optional[int]                     = None,
+        fractional               : Optional[bool]                    = None,
+        variable_tick_size       : Optional[str]                     = None,
+        visible_plots_set        : Optional[VisiblePlotsSet]         = None,
+        volume_precision         : Optional[int]                     = 0,
+        #
+        ################################################################################################## Resolutions
+        #
+        has_daily                : Optional[bool]                    = True,
+        has_intraday             : Optional[bool]                    = True,
+        has_seconds              : Optional[bool]                    = True,
+        has_ticks                : Optional[bool]                    = False,
+        has_weekly_and_monthly   : Optional[bool]                    = False,
+        has_empty_bars           : Optional[bool]                    = False,
+        build_seconds_from_ticks : Optional[bool]                    = False,
+        supported_resolutions    : Optional[list[ResolutionString]]  = ["1S", "5S", "1", "3", "5", "15", "30", "60", "240", "D", "W"],
+        intraday_multipliers     : Optional[List[str]]               = None,
+        seconds_multipliers      : Optional[List[str]]               = ["1", "2", "3", "4", "5", "10", "15", "20", "30", "40"],
+        daily_multipliers        : Optional[List[str]]               = ["1"],
+        weekly_multipliers       : Optional[List[str]]               = ["1"],
+        monthly_multipliers      : Optional[List[str]]               = ["1"],
+        #
+        ################################################################################################## .
+        #
+        # endregion
+        #
+        # region params V2. These params will be implemented in V2
+        #
+        ################################################################################################## Data Capabilities & Status
+        #
+        data_status              : Optional[DataStatus]              = None,
+        delay                    : Optional[int]                     = None,
+        #
+        ################################################################################################## Session and Time
+        #
+        session                  : str                               = "24x7",
+        session_display          : Optional[str]                     = None,
+        session_holidays         : Optional[str]                     = None,
+        subsession_id            : Optional[str]                     = None,
+        subsessions              : Optional[List[SubsessionInfo]]    = None,
+        timezone                 : Timezone                          = Timezone.Etc_UTC,
+        corrections              : Optional[str]                     = None,
+        #
+        ################################################################################################## Futures/Options
+        #
+        expired                  : Optional[bool]                    = False,
+        expiration_date          : Optional[int]                     = None,
+        #
+        ################################################################################################## Units & Currency
+        #
+        currency_code            : Optional[str]                     = None,
+        original_currency_code   : Optional[str]                     = None,
+        unit_id                  : Optional[str]                     = None,
+        original_unit_id         : Optional[str]                     = None,
+        unit_conversion_types    : Optional[List[str]]               = None,
+        #
+        ################################################################################################## Price sources
+        #
+        price_source_id          : Optional[SymbolPriceSource]       = None, # ??
+        price_sources            : Optional[List[SymbolPriceSource]] = None, # ??
+        ################################################################################################## .
+        #
+        #endregion
+        #
+    ):
 
         if (ticker in Symbol._tickers):
 
