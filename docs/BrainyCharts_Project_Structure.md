@@ -7,7 +7,7 @@
 
 - **BrainChart/**
   - **`brainchart/`**: The core package for the BrainChart application, containing all the logic for data handling, server management, and chart rendering.
-  - **`charting_library/`**: Contains the TradingView's advanced charts Library, which is like a 'black box' for us.
+  - **`brainchart/charting_library/`**: Contains the TradingView's advanced charts Library, which is like a 'black box' for us.
   - **`Docs/`**: Project documentations.
   - **`env/`**: Environment-related files, such as conda environment configurations and pip requirements.
   - **`icons/`**: Icons used in the project.
@@ -26,6 +26,8 @@
 
 ```bash
     brainchart/                                    # The core package for the BrainChart application, containing all the logic for data handling, server management, and chart rendering.
+    │
+    ├── charting_library/                          # Contains the TradingView's advanced charts Library, which is like a 'black box' for us.
     │
     ├── __init__.py                                # Marks the `brainchart` directory as a Python package, allowing its modules to be imported.
     │
@@ -49,7 +51,7 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 
 <details>
-<summary>charting_library/</summary>
+<summary>brainchart/charting_library/</summary>
 
 This package contains the TradingView Charting Library, which is the core component used to display the charts.
 

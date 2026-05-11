@@ -36,14 +36,15 @@ from .database import engine, Base, get_db, Shape
 ################################################################################################### Directories
 #
 ROOT_DIR      = Path(__file__).resolve().parent.parent      # project root (BrainChart/)
+BC_DIR        = Path(__file__).resolve().parent             # brainchart (BrainChart/brainchart/)
 
 WIDGET_DIR    = ROOT_DIR / "runtime" / "widget"             # runtime/widget
 DATAFEED_DIR  = ROOT_DIR / "runtime" / "datafeed"           # runtime/datafeed
 WIDGET_DIR.mkdir(parents=True, exist_ok=True)
 DATAFEED_DIR.mkdir(parents=True, exist_ok=True)
 
-TV_LIB_DIR    = ROOT_DIR / "charting_library"               # charting_library/
-TV_DF_DIR     = ROOT_DIR / "charting_library" / "datafeeds" # charting_library/datafeeds/
+TV_LIB_DIR    = ROOT_DIR / BC_DIR / "charting_library"               # charting_library/
+TV_DF_DIR     = ROOT_DIR / BC_DIR / "charting_library" / "datafeeds" # charting_library/datafeeds/
 #
 ###################################################################################################
 ###################################################################################################
