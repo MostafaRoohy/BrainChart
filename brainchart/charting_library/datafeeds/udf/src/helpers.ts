@@ -1,5 +1,5 @@
 export interface RequestParams {
-	[paramName: string]: string | string[] | number;
+	[paramName: string]: string | string[] | number | boolean;
 }
 
 export interface UdfResponse {
@@ -22,7 +22,7 @@ const isLoggingEnabled = false;
 export function logMessage(message: string): void {
 	if (isLoggingEnabled) {
 		const now = new Date();
-		// tslint:disable-next-line:no-console
+		// eslint-disable-next-line no-console
 		console.log(`${now.toLocaleTimeString()}.${now.getMilliseconds()}> ${message}`);
 	}
 }

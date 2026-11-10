@@ -12,22 +12,6 @@ export declare const enum SearchInitiationPoint {
 	IndicatorInputs = "indicatorInputs"
 }
 /**
- * This is the generic type useful for declaring a nominal type,
- * which does not structurally matches with the base type and
- * the other types declared over the same base type
- *
- * Usage:
- * @example
- * type Index = Nominal<number, 'Index'>;
- * // let i: Index = 42; // this fails to compile
- * let i: Index = 42 as Index; // OK
- * @example
- * type TagName = Nominal<string, 'TagName'>;
- */
-export declare type Nominal<T, Name extends string> = T & { /* eslint-disable-next-line jsdoc/require-jsdoc */
-	[Symbol.species]: Name;
-};
-/**
  * Bar data point
  */
 export interface Bar {
@@ -35,6 +19,8 @@ export interface Bar {
 	 * Amount of **milliseconds** since Unix epoch start in **UTC** timezone.
 	 * `time` for daily, weekly, and monthly bars is expected to be a trading day (not session start day) at 00:00 UTC.
 	 * The library adjusts time according to `session` from {@link LibrarySymbolInfo}.
+	 *
+	 * {@link HistoryMetadata.nextTime} is also in milliseconds, while most other time values in the Datafeed API, such as {@link PeriodParams.from}, are in seconds.
 	 */
 	time: number;
 	/** Opening price */
@@ -94,8 +80,8 @@ export interface DatafeedConfiguration {
 	 */
 	exchanges?: Exchange[];
 	/**
-	 * List of [resolutions](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution) that the chart should support.
-	 * Each item of the array is expected to be a string that has a specific [format](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-format).
+	 * List of [resolutions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions) that the chart should support.
+	 * Each item of the array is expected to be a string that has a specific [format](https://www.tradingview.com/charting-library-docs/latest/ui_elements/Resolution#resolution-format).
 	 * If you set this property to `undefined` or an empty array, the _Resolution_ drop-down menu displays the list of resolutions available for
 	 * the current symbol ({@link LibrarySymbolInfo.supported_resolutions}).
 	 *
@@ -168,7 +154,7 @@ export interface DatafeedConfiguration {
 export interface DatafeedQuoteValues {
 	/**
 	 * Price change. It is usually calculated as a difference between the current price and close price of the previous day (regular session).
-	 * In the UI, `ch` and {@link chp} are represented as the last day change parameter in *Data Window*.
+	 * In the UI, `ch` and {@link chp} are represented as the last day change parameter in *data window*.
 	 * You can also display these values in the [legend](https://www.tradingview.com/charting-library-docs/latest/ui_elements/Legend#last-day-change-values).
 	 * If `ch` and `chp` are not provided, `0.00 (0.00%)` is displayed instead.
 	 *
@@ -176,7 +162,7 @@ export interface DatafeedQuoteValues {
 	 */
 	ch?: number;
 	/**
-	 * Price change percentage. In the UI, `chp` and {@link ch} are represented as the last day change parameter in *Data Window*.
+	 * Price change percentage. In the UI, `chp` and {@link ch} are represented as the last day change parameter in *data window*.
 	 * You can also display these values in the [Legend](https://www.tradingview.com/charting-library-docs/latest/ui_elements/Legend#last-day-change-values).
 	 * If `ch` and `chp` are not provided, `0.00 (0.00%)` is displayed instead.
 	 *
@@ -216,13 +202,13 @@ export interface DatafeedQuoteValues {
 	volume?: number;
 	/** Original name */
 	original_name?: string;
-	/** Pre-/post-market price. This value is required to display the [pre-/post-market price line](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions#enable-the-price-line) on the chart and information on the extended session in the [Details](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/#details) widget. */
+	/** Pre-/post-market price. This value is required to display the [pre-/post-market price line](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/Extended-Sessions#enable-the-price-line) on the chart and information on the extended session in the [Details](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/#details) widget. */
 	rtc?: number;
-	/** Pre-/post-market price update time. This value is required to display information on the [extended session](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions) in the [Details](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/#details) widget. */
+	/** Pre-/post-market price update time as a Unix timestamp in seconds. This value is required to display information on the [extended session](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/Extended-Sessions) in the [Details](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/#details) widget. */
 	rtc_time?: number;
-	/** Pre-/post-market price change. This value is required to display information on the [extended session](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions) in the [Details](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/#details) widget. */
+	/** Pre-/post-market price change. This value is required to display information on the [extended session](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/Extended-Sessions) in the [Details](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/#details) widget. */
 	rch?: number;
-	/** Pre-/post-market price change percentage. This value is required to display information on the [extended session](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Extended-Sessions) the [Details](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/#details) widget. */
+	/** Pre-/post-market price change percentage. This value is required to display information on the [extended session](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/Extended-Sessions) the [Details](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/#details) widget. */
 	rchp?: number;
 	[valueName: string]: string | number | string[] | number[] | undefined;
 }
@@ -250,11 +236,15 @@ export interface HistoryMetadata {
 	 */
 	noData?: boolean;
 	/**
-	 * The time of the next available bar in history. The time value should be represented with a Unix timestamp in milliseconds.
+	 * The time of the next available bar in history. The time value should be represented with a Unix timestamp in milliseconds, the same as {@link Bar.time}.
+	 * For example, if the closest bar before the requested range has `time: 1428001140000`, pass `nextTime: 1428001140000`.
 	 *
 	 * You can pass the `nextTime` value to the library if there is no data in the time range that the library requests.
 	 * Therefore, you notify the library about available data before the requested range and ensure that the next data request is for the right range.
 	 * For more information, refer to the [How nextTime works](https://www.tradingview.com/charting-library-docs/latest/connecting_data/UDF#how-nexttime-works) section.
+	 *
+	 * Note that the UDF protocol sends `nextTime` in seconds, and the UDF adapter converts it to milliseconds.
+	 * For backward compatibility, the library also accepts `nextTime` in seconds and logs a warning to the console.
 	 */
 	nextTime?: number | null;
 }
@@ -268,8 +258,8 @@ export interface IDatafeedChartApi {
 	 * **Remark:** This function will be called only if you confirmed that your back-end is supporting marks ({@link DatafeedConfiguration.supports_marks}).
 	 *
 	 * @param symbolInfo A SymbolInfo object
-	 * @param from Unix timestamp (leftmost visible bar)
-	 * @param to Unix timestamp (rightmost visible bar)
+	 * @param from Unix timestamp in seconds (leftmost visible bar)
+	 * @param to Unix timestamp in seconds (rightmost visible bar)
 	 * @param onDataCallback Callback function containing an array of marks
 	 * @param resolution Resolution of the symbol
 	 */
@@ -281,8 +271,8 @@ export interface IDatafeedChartApi {
 	 * **Remark:** This function will be called only if you confirmed that your back-end is supporting marks ({@link DatafeedConfiguration.supports_timescale_marks}).
 	 *
 	 * @param symbolInfo A SymbolInfo object
-	 * @param from Unix timestamp (leftmost visible bar)
-	 * @param to Unix timestamp (rightmost visible bar)
+	 * @param from Unix timestamp in seconds (leftmost visible bar)
+	 * @param to Unix timestamp in seconds (rightmost visible bar)
 	 * @param onDataCallback Callback function containing an array of marks
 	 * @param resolution Resolution of the symbol
 	 */
@@ -290,10 +280,10 @@ export interface IDatafeedChartApi {
 	/**
 	 * This function is called if the `supports_time` configuration flag is `true` when the chart needs to know the server time.
 	 * The library expects a callback to be called once.
-	 * The time is provided without milliseconds. Example: `1445324591`.
+	 * The time is a Unix timestamp in seconds. Example: `1445324591`.
 	 *
 	 * `getServerTime` is used to display countdown on the price scale.
-	 * Note that the countdown can be displayed only for [intraday](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-minutes-intraday) resolutions.
+	 * Note that the countdown can be displayed only for [intraday](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-minutes-intraday) resolutions.
 	 */
 	getServerTime?(callback: ServerTimeCallback): void;
 	/**
@@ -306,6 +296,19 @@ export interface IDatafeedChartApi {
 	 * @param searchSource The source of the search ({@link SearchInitiationPoint}).
 	 */
 	searchSymbols(userInput: string, exchange: string, symbolType: string, onResult: SearchSymbolsCallback, searchSource?: SearchInitiationPoint): void;
+	/**
+	 * Provides a list of symbols that match the user's search query.
+	 *
+	 * Optional. If defined, the library uses this method instead of the non-paginated `searchSymbols`.
+	 *
+	 * Use the `start` property from `options` to determine which "page" of results to return.
+	 * For example, if the first call returns 50 results with 10 remaining, the second call will have `start` set to `50`.
+	 * When no more results are available on the server, set the `symbolsRemaining` parameter of the callback to `0`.
+	 *
+	 * @param options Object containing the user input, exchange, symbol type, and search source ({@link SearchInitiationPoint}).
+	 * @param onResult Callback function that returns an array of results ({@link SearchSymbolResultItem}) or an empty array if no symbols are found.
+	 */
+	searchSymbolsPaginated?(options: SymbolSearchPaginatedOptions, onResult: SearchSymbolsPaginatedCallback): void;
 	/**
 	 * The library will call this function when it needs to get SymbolInfo by symbol name.
 	 *
@@ -359,15 +362,28 @@ export interface IDatafeedChartApi {
 	 */
 	unsubscribeDepth?(subscriberUID: string): void;
 	/**
-	 * The library calls this function to get the resolution that will be used to calculate the Volume Profile Visible Range indicator.
+	 * The library calls this function to get a detailed resolution for the Volume Profile Visible Range,
+	 * Volume Profile Fixed Range, and [Session Volume Profile](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/session-volume-profile)
+	 * indicators. The `from` and `to` arguments describe the visible range, the selected fixed range, or the
+	 * range that the main series has loaded respectively.
 	 *
-	 * Usually you might want to implement this method to calculate the indicator more accurately.
-	 * The implementation really depends on how much data you can transfer to the library and the depth of data in your data feed.
-	 * **Remark:** If this function is not provided the library uses currentResolution.
+	 * Usually, you might want to implement this method to calculate these indicators more accurately.
+	 * The implementation depends on how much data you can transfer to the library and the depth of data in your datafeed.
 	 *
-	 * @param currentResolution Resolution of the symbol
-	 * @param from Unix timestamp (leftmost visible bar)
-	 * @param to Unix timestamp (rightmost visible bar)
+	 * The `currentResolution` argument is the resolution of the chart the indicator is calculated on. If you
+	 * return a different resolution, the library requests an additional series at that resolution. If you
+	 * return `currentResolution`, or do not implement this function at all, Visible Range and Fixed Range
+	 * build the profile from the chart's own bars and no additional request is made.
+	 *
+	 * Session Volume Profile selects the resolution differently. On time-based charts, it can choose a finer
+	 * resolution advertised by the symbol or datafeed, and a finer resolution returned by this function takes
+	 * precedence. On tick charts, it always uses `currentResolution` because finer tick bars cannot be mapped
+	 * completely to a displayed bar by timestamp. Refer to
+	 * [Detailed data](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/session-volume-profile#detailed-data) for the full selection order.
+	 *
+	 * @param currentResolution Resolution of the chart the indicator is calculated on
+	 * @param from Unix timestamp in milliseconds at the start of the calculation range
+	 * @param to Unix timestamp in milliseconds at the end of the calculation range
 	 * @param symbolInfo A Symbol object
 	 * @returns A resolution
 	 */
@@ -472,7 +488,7 @@ export interface LibrarySymbolInfo {
 	 */
 	type: string;
 	/**
-	 * Trading hours for the symbol. The time should be in the **exchange** time zone specified in the {@link LibrarySymbolInfo.timezone} property. Refer to the [Trading sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/Trading-Sessions) article for more information.
+	 * Trading hours for the symbol. The time should be in the **exchange** time zone specified in the {@link LibrarySymbolInfo.timezone} property. Refer to the [Trading sessions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/Trading-Sessions) article for more information.
 	 * @example "1700-0200"
 	 */
 	session: string;
@@ -558,7 +574,7 @@ export interface LibrarySymbolInfo {
 	 * - `fractional` is `true`.
 	 * - `variableMinTick` is skipped.
 	 *
-	 * Example:
+	 * @example
 	 *
 	 * If `minmov = 1`, `pricescale = 128` and `minmove2 = 4`:
 	 *
@@ -591,13 +607,13 @@ export interface LibrarySymbolInfo {
 	 * A flag indicating whether your datafeed contains intraday (minutes) data for this symbol.
 	 * If `true`, the library requests this data when an intraday resolution is selected. If `false`, _No data here_ is displayed on the chart.
 	 *
-	 * This property is required to enable intraday resolutions. Refer to the [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-minutes-intraday) article for more information.
+	 * This property is required to enable intraday resolutions. Refer to the [Configure resolutions in datafeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-minutes-intraday) article for more information.
 	 * @default false
 	 */
 	has_intraday?: boolean;
 	/**
-	 * An array of [resolutions](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution) which should be enabled in the _Resolution_ drop-down menu for this symbol.
-	 * Each item of the array is expected to be a string that has a specific [format](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-format).
+	 * An array of [resolutions](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions) which should be enabled in the _Resolution_ drop-down menu for this symbol.
+	 * Each item of the array is expected to be a string that has a specific [format](https://www.tradingview.com/charting-library-docs/latest/ui_elements/Resolution#resolution-format).
 	 *
 	 * If one changes the symbol and the new symbol does not support the selected resolution, an error message will be shown on the chart.
 	 *
@@ -621,9 +637,9 @@ export interface LibrarySymbolInfo {
 	/**
 	 * An array of intraday (minutes) resolutions that your datafeed supports. Items in the array should be listed in ascending order, for example: `["1", "2"]`.
 	 *
-	 * This property is required to enable intraday resolutions. Refer to the [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-minutes-intraday) article for more information.
+	 * This property is required to enable intraday resolutions. Refer to the [Configure resolutions in datafeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-minutes-intraday) article for more information.
 	 * Note that each resolution in `intraday_multipliers` should be handled in the {@link IDatafeedChartApi.getBars} implementation.
-	 * Consider the [example](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#example).
+	 * Consider the [example](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#example).
 	 *
 	 * The library also uses resolutions listed in `intraday_multipliers` to display higher resolution that your datafeed does not explicitly support. If `intraday_multipliers` is not specified, the library cannot build additional resolutions.
 	 *
@@ -635,7 +651,7 @@ export interface LibrarySymbolInfo {
 	 * A flag indicating whether your datafeed contains seconds data for this symbol.
 	 * If `true`, the library requests this data when a seconds resolution is selected. If `false`, _No data here_ is displayed on the chart.
 	 *
-	 * You should set `has_seconds` to `true` to enable seconds resolutions. Refer to the [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-seconds) article for more information.
+	 * You should set `has_seconds` to `true` to enable seconds resolutions. Refer to the [Configure resolutions in datafeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-seconds) article for more information.
 	 * @default false
 	 */
 	has_seconds?: boolean;
@@ -643,13 +659,13 @@ export interface LibrarySymbolInfo {
 	 * A flag indicating whether your datafeed contains ticks data for this symbol.
 	 * If `true`, the library requests this data when a resolution in ticks is selected. If `false`, _No data here_ is displayed on the chart.
 	 *
-	 * You should set `has_ticks` to `true` to enable ticks resolutions. Refer to the [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-ticks) article for more information.
+	 * You should set `has_ticks` to `true` to enable ticks resolutions. Refer to the [Configure resolutions in datafeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-ticks) article for more information.
 	 * @default false
 	 */
 	has_ticks?: boolean;
 	/**
 	 * An array of seconds resolutions that your datafeed supports. Items in the array should be listed in ascending order and **should not** include letters, for example: `["1", "2"]`.
-	 * This property is required to enable seconds resolutions. Refer to the [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-seconds) article for more information.
+	 * This property is required to enable seconds resolutions. Refer to the [Configure resolutions in datafeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-seconds) article for more information.
 	 *
 	 * The library also uses resolutions listed in `seconds_multipliers` to display higher resolution that your datafeed does not explicitly support. If `seconds_multipliers` is not specified, the library cannot build additional resolutions.
 	 * Consider the example. You need to enable one-second and five-second resolutions but your datafeed contains only one-second data. In this case, you should set `seconds_multipliers` to `["1"]`.
@@ -671,13 +687,13 @@ export interface LibrarySymbolInfo {
 	 * A flag indicating whether your datafeed contains daily data for this symbol.
 	 * If `true`, the library requests this data when a daily resolution is selected. If `false`, _No data here_ is displayed on the chart.
 	 *
-	 * `has_daily` is set to `true` by default. However, you should also specify {@link daily_multipliers} to enable daily resolutions. Refer to the [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-days) article for more information.
+	 * `has_daily` is set to `true` by default. However, you should also specify {@link daily_multipliers} to enable daily resolutions. Refer to the [Configure resolutions in datafeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-days) article for more information.
 	 * @default true
 	 */
 	has_daily?: boolean;
 	/**
 	 * An array of daily resolutions that your datafeed supports. Items in the array should be listed in ascending order and **should not** include letters, for example: `["1", "2"]`.
-	 * This property is required to enable daily resolutions. Refer to the [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-days) article for more information.
+	 * This property is required to enable daily resolutions. Refer to the [Configure resolutions in datafeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-days) article for more information.
 	 *
 	 * The library also uses resolutions listed in `daily_multipliers` to display higher resolution that your datafeed does not explicitly support. If `daily_multipliers` is not specified, the library cannot build additional resolutions.
 	 * @default ["1"]
@@ -686,7 +702,7 @@ export interface LibrarySymbolInfo {
 	/**
 	 * A flag indicating whether your datafeed contains weekly or monthly data for this symbol. If `true`, the library requests this data when the corresponding resolution is selected.
 	 * To enable weekly or monthly resolutions, you should also specify the {@link weekly_multipliers} or {@link monthly_multipliers} properties.
-	 * Refer to the [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-weeks--months) article for more information.
+	 * Refer to the [Configure resolutions in datafeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-weeks--months) article for more information.
 	 *
 	 * If `has_weekly_and_monthly` is set to `false`, the library attempts to build the resolutions using daily bars. Note that building bars requires a large number of requests to your datafeed.
 	 * If the library fails to build bars, _No data here_ is displayed on the chart.
@@ -695,7 +711,7 @@ export interface LibrarySymbolInfo {
 	has_weekly_and_monthly?: boolean;
 	/**
 	 * An array of weekly resolutions that your datafeed supports. Items in the array should be listed in ascending order and **should not** include letters, for example: `["1", "3"]`.
-	 * This property is required to enable weekly resolutions. Refer to the [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-weeks--months) article for more information.
+	 * This property is required to enable weekly resolutions. Refer to the [Configure resolutions in datafeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-weeks--months) article for more information.
 	 *
 	 * The library also uses resolutions listed in `weekly_multipliers` to display higher resolution that your datafeed does not explicitly support. If `weekly_multipliers` is not specified, the library cannot build additional resolutions.
 	 * @default ['1']
@@ -703,18 +719,17 @@ export interface LibrarySymbolInfo {
 	weekly_multipliers?: string[];
 	/**
 	 * An array of monthly resolutions that your datafeed supports. Items in the array should be listed in ascending order and **should not** include letters, for example: `["1", "3", "6", "12"]`.
-	 * This property is required to enable monthly resolutions. Refer to the [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution#resolution-in-weeks--months) article for more information.
+	 * This property is required to enable monthly resolutions. Refer to the [Configure resolutions in datafeed](https://www.tradingview.com/charting-library-docs/latest/connecting_data/time-and-sessions/configure-datafeed-resolutions#resolution-in-weeks--months) article for more information.
 	 *
 	 * The library also uses resolutions listed in `monthly_multipliers` to display higher resolution that your datafeed does not explicitly support. If `monthly_multipliers` is not specified, the library cannot build additional resolutions.
 	 * @default ['1']
 	 */
 	monthly_multipliers?: string[];
 	/**
-	 * The boolean value showing whether the library should generate empty bars in the session when there is no data from the data feed for this particular time.
+	 * Whether the library should generate empty bars when the datafeed provides no data for a certain period within the trading session.
+	 * For example, if the session is `0900-1600`, the data has a gap between `11:00` and `12:00`, and `has_empty_bars` is `true`, the library fills this gap with bars.
 	 *
-	 * I.e., if your session is `0900-1600` and your data has gaps between `11:00` and `12:00` and your `has_empty_bars` is `true`, then the Library will fill the gaps with bars for this time.
-	 *
-	 * Flag `has_empty_bars` = `true` cannot be used if featureset `disable_resolution_rebuild` is enabled.
+	 * Note that `has_empty_bars` cannot be used if the [`disable_resolution_rebuild`](https://www.tradingview.com/charting-library-docs/latest/customization/Featuresets#disable_resolution_rebuild) featureset is enabled.
 	 * @default false
 	 */
 	has_empty_bars?: boolean;
@@ -755,7 +770,7 @@ export interface LibrarySymbolInfo {
 	 */
 	expired?: boolean;
 	/**
-	 * Unix timestamp of the expiration date. One must set this value when `expired` = `true`.
+	 * Unix timestamp in seconds of the expiration date. One must set this value when `expired` = `true`.
 	 * The library will request data for this symbol starting from that time point.
 	 */
 	expiration_date?: number;
@@ -820,7 +835,7 @@ export interface LibrarySymbolInfo {
 	 * The image/s should ideally be square in dimension. You can use any image type which
 	 * the browser supports natively.
 	 *
-	 * Examples:
+	 * @example
 	 * - `https://yourserver.com/apple.svg`
 	 * - `/images/myImage.png`
 	 * - `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3...`
@@ -838,7 +853,7 @@ export interface LibrarySymbolInfo {
 	 * The image should ideally be square in dimension. You can use any image type which
 	 * the browser supports natively. Simple SVG images are recommended.
 	 *
-	 * Examples:
+	 * @example
 	 * - `https://yourserver.com/exchangeLogo.svg`
 	 * - `/images/myImage.png`
 	 * - `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3...`
@@ -866,6 +881,18 @@ export interface Mark {
 	color: MarkConstColors | MarkCustomColor;
 	/** Text content for the mark */
 	text: string;
+	/**
+	 * Trading Platform only. Optional content for a custom tooltip rendered by your own `tv-custom-bar-mark`
+	 * [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements)
+	 * instead of the default `text` tooltip. The value is an opaque payload — typically a JSON string —
+	 * that the library sets as the element's text content. It is never parsed as HTML by the library.
+	 *
+	 * Register the element by loading a module via the `custom_js_urls` widget constructor option
+	 * or the `addCustomJSFile` widget method. If the element is not registered,
+	 * the default `text` rendering is used instead.
+	 * See the [Customize mark tooltips](https://www.tradingview.com/charting-library-docs/latest/tutorials/how-to-guides/customize-mark-tooltips) guide for more information.
+	 */
+	customTooltip?: string;
 	/** Label for the mark */
 	label: string;
 	/** Text color for the mark */
@@ -882,7 +909,7 @@ export interface Mark {
 	 * The image should ideally be square in dimension. You can use any image type which
 	 * the browser supports natively.
 	 *
-	 * Examples:
+	 * @example
 	 * - `https://yourserver.com/adobe.svg`
 	 * - `/images/myImage.png`
 	 * - `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3...`
@@ -908,11 +935,11 @@ export interface MarkCustomColor {
  */
 export interface PeriodParams {
 	/**
-	 * Unix timestamp (leftmost requested bar)
+	 * Unix timestamp in seconds (leftmost requested bar)
 	 */
 	from: number;
 	/**
-	 * Unix timestamp (rightmost requested bar - not inclusive)
+	 * Unix timestamp in seconds (rightmost requested bar - not inclusive)
 	 */
 	to: number;
 	/**
@@ -948,7 +975,7 @@ export interface QuoteOkData extends QuoteDataResponse {
 }
 /**
  * [Symbol Search](https://www.tradingview.com/charting-library-docs/latest/ui_elements/Symbol-Search) result item.
- * Pass the resulting array of symbols as a parameter to {@link SearchSymbolsCallback} of the [`searchSymbols`](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods#searchsymbols) method.
+ * Pass the resulting array to the callback for [`searchSymbols`](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods#searchsymbols) or [`searchSymbolsPaginated`](https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/additional-methods#searchsymbolspaginated).
  *
  * @example
  * ```
@@ -993,7 +1020,7 @@ export interface SearchSymbolResultItem {
 	 * The image/s should ideally be square in dimension. You can use any image type which
 	 * the browser supports natively. Simple SVG images are recommended.
 	 *
-	 * Examples:
+	 * @example
 	 * - `https://yourserver.com/symbolName.svg`
 	 * - `/images/myImage.png`
 	 * - `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3...`
@@ -1011,7 +1038,7 @@ export interface SearchSymbolResultItem {
 	 * The image should ideally be square in dimension. You can use any image type which
 	 * the browser supports natively. Simple SVG images are recommended.
 	 *
-	 * Examples:
+	 * @example
 	 * - `https://yourserver.com/exchangeLogo.svg`
 	 * - `/images/myImage.png`
 	 * - `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3...`
@@ -1043,6 +1070,31 @@ export interface SymbolResolveExtension {
 	 */
 	session?: string;
 }
+/**
+ * Options that define paginated [Symbol Search](https://www.tradingview.com/charting-library-docs/latest/ui_elements/Symbol-Search) requests.
+ */
+export interface SymbolSearchPaginatedOptions {
+	/**
+	 * The requested exchange. An empty value means no filter is specified.
+	 */
+	exchange: string;
+	/**
+	 * Text entered by the user in the Symbol Search field.
+	 */
+	userInput: string;
+	/**
+	 * The number of results to skip, representing how many have already been returned for the same input.
+	 */
+	start?: number;
+	/**
+	 * Type of symbol. An empty value means no filter is specified.
+	 */
+	symbolType: string;
+	/**
+	 * The source of the search ({@link SearchInitiationPoint}).
+	 */
+	searchSource?: SearchInitiationPoint;
+}
 export interface TimescaleMark {
 	/** ID of the timescale mark */
 	id: string | number;
@@ -1062,6 +1114,18 @@ export interface TimescaleMark {
 	label: string;
 	/** Tooltip content */
 	tooltip: string[];
+	/**
+	 * Trading Platform only. Optional content for a custom tooltip rendered by your own `tv-custom-timescale-mark`
+	 * [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements)
+	 * instead of the default tooltip body. The value is an opaque payload — typically a JSON string —
+	 * that the library sets as the element's text content. It is never parsed as HTML by the library.
+	 *
+	 * Register the element by loading a module via the `custom_js_urls` widget constructor option
+	 * or the `addCustomJSFile` widget method. If the element is not registered,
+	 * the default `tooltip` rendering is used instead.
+	 * See the [Customize mark tooltips](https://www.tradingview.com/charting-library-docs/latest/tutorials/how-to-guides/customize-mark-tooltips) guide for more information.
+	 */
+	customTooltip?: string;
 	/** Shape of the timescale mark */
 	shape?: TimeScaleMarkShape;
 	/**
@@ -1070,7 +1134,7 @@ export interface TimescaleMark {
 	 * The image should ideally be square in dimension. You can use any image type which
 	 * the browser supports natively.
 	 *
-	 * Examples:
+	 * @example
 	 * - `https://s3-symbol-logo.tradingview.com/crypto/XTVCBTC.svg`
 	 * - `/images/myImage.png`
 	 * - `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3...`
@@ -1093,13 +1157,29 @@ export interface Unit {
 	/** Description */
 	description: string;
 }
-export type CustomTimezones = "Africa/Cairo" | "Africa/Casablanca" | "Africa/Johannesburg" | "Africa/Lagos" | "Africa/Nairobi" | "Africa/Tunis" | "America/Anchorage" | "America/Argentina/Buenos_Aires" | "America/Bogota" | "America/Caracas" | "America/Chicago" | "America/El_Salvador" | "America/Juneau" | "America/Lima" | "America/Los_Angeles" | "America/Mexico_City" | "America/New_York" | "America/Phoenix" | "America/Santiago" | "America/Sao_Paulo" | "America/Toronto" | "America/Vancouver" | "Asia/Almaty" | "Asia/Ashkhabad" | "Asia/Bahrain" | "Asia/Bangkok" | "Asia/Chongqing" | "Asia/Colombo" | "Asia/Dhaka" | "Asia/Dubai" | "Asia/Ho_Chi_Minh" | "Asia/Hong_Kong" | "Asia/Jakarta" | "Asia/Jerusalem" | "Asia/Karachi" | "Asia/Kathmandu" | "Asia/Kolkata" | "Asia/Kuala_Lumpur" | "Asia/Kuwait" | "Asia/Manila" | "Asia/Muscat" | "Asia/Nicosia" | "Asia/Qatar" | "Asia/Riyadh" | "Asia/Seoul" | "Asia/Shanghai" | "Asia/Singapore" | "Asia/Taipei" | "Asia/Tehran" | "Asia/Tokyo" | "Asia/Yangon" | "Atlantic/Azores" | "Atlantic/Reykjavik" | "Australia/Adelaide" | "Australia/Brisbane" | "Australia/Perth" | "Australia/Sydney" | "Europe/Amsterdam" | "Europe/Athens" | "Europe/Belgrade" | "Europe/Berlin" | "Europe/Bratislava" | "Europe/Brussels" | "Europe/Bucharest" | "Europe/Budapest" | "Europe/Copenhagen" | "Europe/Dublin" | "Europe/Helsinki" | "Europe/Istanbul" | "Europe/Lisbon" | "Europe/London" | "Europe/Luxembourg" | "Europe/Madrid" | "Europe/Malta" | "Europe/Moscow" | "Europe/Oslo" | "Europe/Paris" | "Europe/Prague" | "Europe/Riga" | "Europe/Rome" | "Europe/Stockholm" | "Europe/Tallinn" | "Europe/Vienna" | "Europe/Vilnius" | "Europe/Warsaw" | "Europe/Zurich" | "Pacific/Auckland" | "Pacific/Chatham" | "Pacific/Fakaofo" | "Pacific/Honolulu" | "Pacific/Norfolk" | "US/Mountain";
+export type CustomTimezones = "Africa/Cairo" | "Africa/Casablanca" | "Africa/Johannesburg" | "Africa/Lagos" | "Africa/Nairobi" | "Africa/Tunis" | "America/Anchorage" | "America/Argentina/Buenos_Aires" | "America/Bogota" | "America/Caracas" | "America/Chicago" | "America/El_Salvador" | "America/Halifax" | "America/Juneau" | "America/Lima" | "America/Los_Angeles" | "America/Mexico_City" | "America/New_York" | "America/Phoenix" | "America/Santiago" | "America/Sao_Paulo" | "America/Toronto" | "America/Vancouver" | "Asia/Almaty" | "Asia/Ashkhabad" | "Asia/Bahrain" | "Asia/Bangkok" | "Asia/Chongqing" | "Asia/Colombo" | "Asia/Dhaka" | "Asia/Dubai" | "Asia/Ho_Chi_Minh" | "Asia/Hong_Kong" | "Asia/Jakarta" | "Asia/Jerusalem" | "Asia/Kabul" | "Asia/Karachi" | "Asia/Kathmandu" | "Asia/Kolkata" | "Asia/Kuala_Lumpur" | "Asia/Kuwait" | "Asia/Manila" | "Asia/Muscat" | "Asia/Nicosia" | "Asia/Qatar" | "Asia/Riyadh" | "Asia/Seoul" | "Asia/Shanghai" | "Asia/Singapore" | "Asia/Taipei" | "Asia/Tehran" | "Asia/Tokyo" | "Asia/Yangon" | "Atlantic/Azores" | "Atlantic/Reykjavik" | "Australia/Adelaide" | "Australia/Brisbane" | "Australia/Perth" | "Australia/Sydney" | "Europe/Amsterdam" | "Europe/Athens" | "Europe/Belgrade" | "Europe/Berlin" | "Europe/Bratislava" | "Europe/Brussels" | "Europe/Bucharest" | "Europe/Budapest" | "Europe/Copenhagen" | "Europe/Dublin" | "Europe/Helsinki" | "Europe/Istanbul" | "Europe/Lisbon" | "Europe/Ljubljana" | "Europe/London" | "Europe/Luxembourg" | "Europe/Madrid" | "Europe/Malta" | "Europe/Moscow" | "Europe/Oslo" | "Europe/Paris" | "Europe/Prague" | "Europe/Riga" | "Europe/Rome" | "Europe/Sofia" | "Europe/Stockholm" | "Europe/Tallinn" | "Europe/Vienna" | "Europe/Vilnius" | "Europe/Warsaw" | "Europe/Zagreb" | "Europe/Zurich" | "Pacific/Auckland" | "Pacific/Chatham" | "Pacific/Fakaofo" | "Pacific/Honolulu" | "Pacific/Norfolk" | "US/Mountain";
 export type DOMCallback = (data: DOMData) => void;
 export type DatafeedErrorCallback = (reason: string) => void;
 export type GetMarksCallback<T> = (marks: T[]) => void;
 export type HistoryCallback = (bars: Bar[], meta?: HistoryMetadata) => void;
-export type LibrarySessionId = "regular" | "extended" | "premarket" | "postmarket";
+export type LibrarySessionId = "regular" | "extended" | "premarket" | "postmarket" | "24h" | "night";
 export type MarkConstColors = "red" | "green" | "blue" | "yellow";
+/**
+ * This is the generic type useful for declaring a nominal type,
+ * which does not structurally matches with the base type and
+ * the other types declared over the same base type
+ *
+ * Usage:
+ * @example
+ * type Index = Nominal<number, 'Index'>;
+ * // let i: Index = 42; // this fails to compile
+ * let i: Index = 42 as Index; // OK
+ * @example
+ * type TagName = Nominal<string, 'TagName'>;
+ */
+export type Nominal<T, Name extends string> = T & { /* eslint-disable-next-line jsdoc/require-jsdoc */
+	[Symbol.species]: Name;
+};
 export type OnReadyCallback = (configuration: DatafeedConfiguration) => void;
 export type QuoteData = QuoteOkData | QuoteErrorData;
 /**
@@ -1126,11 +1206,12 @@ export type QuotesErrorCallback = (reason: string) => void;
  * Months | `xM` | `1M` — one month
  * Years | `xM` months | `12M` — one year
  *
- * Refer to [Resolution](https://www.tradingview.com/charting-library-docs/latest/core_concepts/Resolution) for more information.
+ * Refer to [Resolution](https://www.tradingview.com/charting-library-docs/latest/ui_elements/Resolution) for more information.
  */
 export type ResolutionString = Nominal<string, "ResolutionString">;
 export type ResolveCallback = (symbolInfo: LibrarySymbolInfo) => void;
 export type SearchSymbolsCallback = (items: SearchSymbolResultItem[]) => void;
+export type SearchSymbolsPaginatedCallback = (items: SearchSymbolResultItem[], symbolsRemaining: number) => void;
 export type SeriesFormat = "price" | "volume";
 export type ServerTimeCallback = (serverTime: number) => void;
 export type SubscribeBarsCallback = (bar: Bar) => void;
